@@ -48,6 +48,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
   const toggleLocale = useCallback(() => {
     setLocale(locale === "hi" ? "en" : "hi");
   }, [locale, setLocale]);

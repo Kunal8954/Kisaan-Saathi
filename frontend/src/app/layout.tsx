@@ -4,12 +4,9 @@ import type { ReactNode } from "react";
 import { AppChrome } from "@/components/AppChrome";
 import { AuthProvider } from "@/components/AuthProvider";
 import { NavBar } from "@/components/NavBar";
-import { getDictionary } from "@/lib/i18n";
 import { LanguageProvider } from "@/lib/locale";
 
 import "./globals.css";
-
-const dictionary = getDictionary("hi");
 
 export const metadata: Metadata = {
   title: {
@@ -38,9 +35,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <LanguageProvider>
           <AuthProvider>
-            <AppChrome header={<NavBar />} footer={dictionary.footer}>
-              {children}
-            </AppChrome>
+            <AppChrome header={<NavBar />}>{children}</AppChrome>
           </AuthProvider>
         </LanguageProvider>
       </body>

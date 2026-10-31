@@ -1,38 +1,35 @@
-import type { Metadata } from "next";
+"use client";
 
 import { ChatBubble } from "@/components/ChatBubble";
 import { VoiceButton } from "@/components/VoiceButton";
-
-export const metadata: Metadata = {
-  title: "खेती सलाह",
-};
+import { useI18n } from "@/lib/locale";
 
 export default function ChatPage() {
+  const { t } = useI18n();
+
   return (
     <>
       <header className="page-heading">
-        <p className="eyebrow">बातचीत</p>
-        <h1>अपने खेत के बारे में पूछें</h1>
-        <p>हिंदी में लिखें या बोलें। जवाब स्रोतों और सुरक्षा सलाह के साथ मिलेगा।</p>
+        <p className="eyebrow">{t.chat.eyebrow}</p>
+        <h1>{t.chat.title}</h1>
+        <p>{t.chat.lede}</p>
       </header>
 
       <section className="panel">
-        <ChatBubble role="assistant">
-          नमस्ते। अपनी फसल, मौसम या योजना से जुड़ा सवाल पूछिए।
-        </ChatBubble>
-        <ChatBubble role="farmer">मेरी गेहूं की पत्तियाँ पीली हो रही हैं।</ChatBubble>
+        <ChatBubble role="assistant">{t.chat.greeting}</ChatBubble>
+        <ChatBubble role="farmer">{t.chat.farmerExample}</ChatBubble>
         <div className="composer">
-          <label htmlFor="chat-message">अपना सवाल लिखें</label>
+          <label htmlFor="chat-message">{t.chat.label}</label>
           <textarea
             id="chat-message"
             rows={3}
             disabled
-            placeholder="चैट कार्यान्वयन अभी बाकी है"
+            placeholder={t.chat.placeholder}
           />
           <div className="actions">
             <VoiceButton />
             <button className="button" type="button" disabled>
-              भेजें
+              {t.chat.send}
             </button>
           </div>
         </div>

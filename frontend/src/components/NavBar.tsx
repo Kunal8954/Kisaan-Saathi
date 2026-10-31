@@ -1,24 +1,29 @@
+"use client";
+
 import Link from "next/link";
 
-import { getDictionary } from "@/lib/i18n";
-
-const dictionary = getDictionary("hi");
-
-const links = [
-  { href: "/", label: dictionary.nav.home },
-  { href: "/chat", label: dictionary.nav.chat },
-  { href: "/diagnose", label: dictionary.nav.diagnose },
-  { href: "/soil", label: dictionary.nav.soil },
-  { href: "/map", label: dictionary.nav.map },
-  { href: "/schemes", label: dictionary.nav.schemes },
-];
+import { useAuth } from "@/components/AuthProvider";
+import { LanguageToggle } from "@/components/LanguageToggle";
+import { useI18n } from "@/lib/locale";
 
 export function NavBar() {
+  const { t } = useI18n();
+  const { user, loading } = useAuth();
+
+  const links = [
+    { href: "/", label: t.nav.home },
+    { href: "/chat", label: t.nav.chat },
+    { href: "/diagnose", label: t.nav.diagnose },
+    { href: "/soil", label: t.nav.soil },
+    { href: "/map", label: t.nav.map },
+    { href: "/schemes", label: t.nav.schemes },
+  ];
+
   return (
     <header className="site-header">
-      <nav className="nav" aria-label="Main navigation">
+      <nav className="nav" aria-label={t.nav.label}>
         <Link className="brand" href="/">
-          {dictionary.brand}
+          {t.brand}
         </Link>
         <div className="nav-links">
           {links.map((link) => (
@@ -26,6 +31,14 @@ export function NavBar() {
               {link.label}
             </Link>
           ))}
+        </div>
+        <div className="nav-actions">
+          <LanguageToggle />
+          {loading ? null : (
+            <Link className="nav-auth" href={user ? "/dashboard" : "/login"}>
+              {user ? t.nav.dashboard : t.nav.login}
+            </Link>
+          )}
         </div>
       </nav>
     </header>

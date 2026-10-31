@@ -11,9 +11,20 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import chat, diagnose, places, reports, schemes, soil, stress
+from app.api.routes import (
+    chat,
+    diagnose,
+    geocode,
+    places,
+    reports,
+    schemes,
+    soil,
+    stress,
+    weather,
+)
 from app.config import get_settings
 from app.models.system import HealthResponse
+from heatmap_server import router as heatmap_router
 
 settings = get_settings()
 
@@ -41,8 +52,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-for route_module in (chat, diagnose, soil, stress, schemes, places, reports):
+for route_module in (
+    chat,
+    diagnose,
+    soil,
+    stress,
+    schemes,
+    places,
+    reports,
+    weather,
+    geocode,
+):
     app.include_router(route_module.router, prefix=settings.api_prefix)
+
+app.include_router(heatmap_router, prefix=settings.api_prefix)
 
 
 @app.get("/health", response_model=HealthResponse, tags=["system"])

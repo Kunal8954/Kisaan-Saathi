@@ -1,6 +1,6 @@
 "use client";
 
-import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import {
   createContext,
   useCallback,
@@ -11,23 +11,39 @@ import {
   type ReactNode,
 } from "react";
 
+import {
+  isDevAuthEnabled,
+  readDevUser,
+  signInDevUser,
+  signOutDevUser,
+  type AppUser,
+} from "@/lib/devAuth";
 import { getFirebaseAuth, isFirebaseConfigured } from "@/lib/firebase";
 
 interface AuthContextValue {
-  user: User | null;
+  user: AppUser | null;
   loading: boolean;
   configured: boolean;
   signOutUser: () => Promise<void>;
+  signInDev: (email: string, password: string) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(isFirebaseConfigured);
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [loading, setLoading] = useState(
+    isFirebaseConfigured || isDevAuthEnabled
+  );
   const configured = isFirebaseConfigured;
 
   useEffect(() => {
+    if (isDevAuthEnabled) {
+      setUser(readDevUser());
+      setLoading(false);
+      return;
+    }
+
     if (!configured) {
       setLoading(false);
       return;
@@ -64,7 +80,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [configured]);
 
+  const signInDev = useCallback((email: string, password: string) => {
+    const next = signInDevUser(email, password);
+    setUser(next);
+  }, []);
+
   const signOutUser = useCallback(async () => {
+    if (isDevAuthEnabled) {
+      signOutDevUser();
+      setUser(null);
+      return;
+    }
     if (!configured) {
       return;
     }
@@ -76,8 +102,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [configured]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, loading, configured, signOutUser }),
-    [user, loading, configured, signOutUser]
+    () => ({ user, loading, configured, signOutUser, signInDev }),
+    [user, loading, configured, signOutUser, signInDev]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -6,12 +6,97 @@ export const dictionaries = {
   hi: {
     brand: "किसान साथी",
     nav: {
+      label: "मुख्य नेविगेशन",
       home: "होम",
       chat: "सलाह",
       diagnose: "फसल रोग",
       soil: "मिट्टी",
       map: "नक्शा",
       schemes: "योजनाएँ",
+      login: "लॉगिन",
+      dashboard: "डैशबोर्ड",
+    },
+    home: {
+      eyebrow: "हिंदी-प्रथम खेती सलाहकार",
+      title: "बदलते मौसम में खेती के लिए भरोसेमंद साथी",
+      lede:
+        "आवाज़, टेक्स्ट, फोटो और रिपोर्ट से फसल, मिट्टी, सिंचाई और बीमा के सवालों के जवाब।",
+      start: "सलाह शुरू करें",
+      checkCrop: "फसल की फोटो जाँचें",
+      featuresHeading: "सुविधाएँ",
+      features: {
+        planner: {
+          title: "फसल योजना",
+          description: "जलवायु, मौसम और मंडी भाव के आधार पर फसल चुनने में मदद।",
+        },
+        disease: {
+          title: "फसल रोग जाँच",
+          description: "फोटो से संभावित कारण और दो उपाय, स्रोतों के साथ।",
+        },
+        soil: {
+          title: "मिट्टी विश्लेषण",
+          description: "मिट्टी परीक्षण रिपोर्ट से खनिज सिफारिशें।",
+        },
+        map: {
+          title: "सैटेलाइट तनाव नक्शा",
+          description: "खेत के लिए NDVI, NDMI, तापमान और नमी संकेत।",
+        },
+        schemes: {
+          title: "सरकारी योजनाएँ",
+          description: "PMFBY, PM-KISAN, KCC और अन्य योजनाओं की जानकारी।",
+        },
+      },
+      noticeTitle: "महत्वपूर्ण सूचना",
+      noticeText:
+        "यह ऐप शुरुआती सलाह देता है। रोग, दवा या बीमा दावे से पहले अपने स्थानीय कृषि विज्ञान केंद्र (KVK) से सलाह लें।",
+    },
+    chat: {
+      eyebrow: "बातचीत",
+      title: "अपने खेत के बारे में पूछें",
+      lede:
+        "हिंदी में लिखें या बोलें। जवाब स्रोतों और सुरक्षा सलाह के साथ मिलेगा।",
+      greeting: "नमस्ते। अपनी फसल, मौसम या योजना से जुड़ा सवाल पूछिए।",
+      farmerExample: "मेरी गेहूं की पत्तियाँ पीली हो रही हैं।",
+      label: "अपना सवाल लिखें",
+      placeholder: "चैट कार्यान्वयन अभी बाकी है",
+      send: "भेजें",
+      voice: "बोलकर पूछें",
+      voiceNotReady: "आवाज़ से पूछना अभी बाकी है",
+      roleFarmer: "किसान",
+      roleAssistant: "किसान साथी",
+    },
+    diagnose: {
+      eyebrow: "रोग डॉक्टर",
+      title: "फसल की फोटो से जाँच",
+      lede:
+        "संभावित कारण, भरोसा स्कोर, दो उपाय (रासायनिक और जैविक) और स्थानीय KVK सलाह दिखाई जाएगी।",
+      uploadLabel: "प्रभावित पत्ती या पौधे की फोटो चुनें",
+      safetyTitle: "सुरक्षा नियम",
+      safetyText:
+        "उपाय केवल प्रमाणित कृषि दस्तावेजों से दिए जाएँगे। कोई भी दवा लगाने से पहले अपने KVK या कृषि विशेषज्ञ से सलाह लें।",
+    },
+    soil: {
+      eyebrow: "मिट्टी विश्लेषक",
+      title: "मिट्टी परीक्षण रिपोर्ट अपलोड करें",
+      lede: "PDF या फोटो से खनिज मान निकालकर सुझाव तैयार किए जाएँगे।",
+      uploadLabel: "मिट्टी परीक्षण रिपोर्ट चुनें",
+      pending: "रिपोर्ट पढ़ने और खनिज सिफारिशों का कार्यान्वयन अभी बाकी है।",
+    },
+    schemes: {
+      eyebrow: "योजना सलाहकार",
+      title: "सरकारी योजनाओं की जानकारी",
+      lede:
+        "पात्रता संकेत, जरूरी दस्तावेज और बीमा दावे के कदम प्रमाणित दस्तावेजों से लिए जाएँगे।",
+      questionLabel: "योजना के बारे में पूछें",
+      placeholder: "उदाहरण: PMFBY में दावा कैसे करें?",
+      search: "जवाब खोजें",
+      pending: "RAG खोज और उत्तर निर्माण अभी बाकी है।",
+    },
+    map: {
+      eyebrow: "तनाव मॉनिटर",
+      title: "खेत का सैटेलाइट तनाव नक्शा",
+      lede:
+        "Sentinel-2 से NDVI, 3 साल के औसत से तुलना (anomaly), पत्तों की नमी (NDMI) और Sentinel-3 से भूमि तापमान देखें।",
     },
     footer: "किसान साथी — जलवायु-अनुकूल खेती का साथी",
     common: {
@@ -19,6 +104,131 @@ export const dictionaries = {
       loading: "लोड हो रहा है...",
       optional: "वैकल्पिक",
       switchLanguage: "भाषा बदलें",
+      notImplemented: "अपलोड और विश्लेषण अभी बाकी है।",
+    },
+    stress: {
+      field: "खेत चुनें",
+      noFields: "पहले डैशबोर्ड पर अपना खेत सहेजें।",
+      goToDashboard: "डैशबोर्ड खोलें",
+      loginRequired:
+        "नक्शा देखने के लिए पहले लॉगिन करें और डैशबोर्ड पर खेत सहेजें।",
+      goToLogin: "लॉगिन करें",
+      dateFrom: "से तारीख",
+      dateTo: "तक तारीख",
+      load: "नक्शा देखें",
+      loading: "सैटेलाइट डेटा लोड हो रहा है...",
+      error: "नक्शा नहीं बन सका। कृपया फिर कोशिश करें।",
+      empty:
+        "इस अवधि में साफ सैटेलाइट तस्वीर नहीं मिली। तारीख की सीमा बढ़ाएँ।",
+      layers: {
+        ndvi: "NDVI",
+        anomaly: "NDVI anomaly",
+        ndmi: "NDMI",
+        lst: "भूमि तापमान",
+      },
+      layerHint: {
+        ndvi: "हरा = घनी और स्वस्थ फसल, लाल = कम वनस्पति।",
+        anomaly: "हरा = पिछले 3 साल की इसी अवधि से बेहतर, लाल = कमज़ोर।",
+        ndmi: "हरा = पत्तों में ज़्यादा नमी, लाल = नमी की कमी।",
+        lst: "हरा = ठंडी सतह, लाल = गर्म सतह।",
+      },
+      metricsTitle: "इस अवधि के आंकड़े",
+      metricNdvi: "औसत NDVI",
+      metricAnomaly: "NDVI anomaly",
+      metricNdmi: "औसत NDMI",
+      metricLst: "भूमि तापमान",
+      metricSoil: "मिट्टी नमी",
+      baseline: "3 साल का औसत",
+      unavailable: "उपलब्ध नहीं",
+      soilUnavailable:
+        "मिट्टी नमी का सैटेलाइट स्रोत अभी जुड़ा नहीं है। NDMI को नमी के संकेत के रूप में देखें।",
+      explainTitle: "इस नक्शे का मतलब क्या है?",
+      explainNdvi:
+        "NDVI बताता है कि फसल कितनी हरी और घनी है। 0.6 से ऊपर अच्छा माना जाता है; 0.3 से नीचे तनाव का संकेत हो सकता है।",
+      explainAnomaly:
+        "NDVI anomaly इस अवधि के NDVI की तुलना पिछले 3 साल की इसी अवधि से करता है। शून्य के आसपास = सामान्य; नकारात्मक = उम्मीद से कमज़ोर फसल।",
+      explainNdmi:
+        "NDMI पत्तों की नमी दिखाता है। 0.3 से ऊपर आम तौर पर ठीक; 0.1 से नीचे सूखे का संकेत।",
+      explainLst:
+        "भूमि तापमान Sentinel-3 से आता है (1 किमी रिज़ॉल्यूशन, सिर्फ दिन के पास)। ज़्यादा गर्म सतह पानी की कमी या तनाव का संकेत हो सकती है।",
+      explainCloud:
+        "खाली या पारदर्शी हिस्से बादल या उस दिन सैटेलाइट पास न होने के कारण हैं। लंबी तारीख सीमा चुनें।",
+      legendLow: "कम",
+      legendHigh: "अधिक",
+      legendTempLow: "ठंडा",
+      legendTempHigh: "गर्म",
+      disclaimer:
+        "सैटेलाइट डेटा सिर्फ सलाहकार प्रमाण है, नुकसान का सबूत नहीं।",
+    },
+    fieldAdvisory: {
+      title: "खेत का पर्यावरण सलाह",
+      subtitle:
+        "सैटेलाइट और मौसम के संकेतों से आज के लिए सुझाव। यह नुकसान का प्रमाण नहीं है।",
+      metricsLoading: "खेत का सैटेलाइट विश्लेषण हो रहा है...",
+      metricsError: "सैटेलाइट आंकड़े नहीं मिले। मौसम की सलाह नीचे देखें।",
+      metricsHint:
+        "गर्मी, नमी और फसल की सैटेलाइट सलाह के लिए ऊपर से नक्शा लोड करें।",
+      weatherLoading: "मौसम लोड हो रहा है...",
+      weatherError: "मौसम डेटा नहीं मिला।",
+      nowTitle: "अभी का मौसम",
+      temperature: "तापमान",
+      humidity: "नमी",
+      windLabel: "हवा",
+      rainLabel: "बारिश",
+      weatherSource: "मौसम: Open-Meteo",
+      satelliteSource: "सैटेलाइट: Copernicus Sentinel",
+      severity: {
+        good: "ठीक",
+        watch: "ध्यान दें",
+        alert: "सावधान",
+        neutral: "जानकारी नहीं",
+      },
+      heat: {
+        title: "गर्मी",
+        normal:
+          "सतह का तापमान सामान्य है। सामान्य सिंचाई और निगरानी रखें।",
+        moderate:
+          "सतह गर्म है। सुबह या शाम सिंचाई करें और मल्चिंग से नमी बचाएँ।",
+        high:
+          "तेज़ गर्मी है। दोपहर में छिड़काव या खाद न डालें; सिंचाई और छाया/मल्च पर ध्यान दें।",
+        unknown: "भूमि तापमान उपलब्ध नहीं है।",
+      },
+      water: {
+        title: "पानी/नमी",
+        adequate:
+          "पत्तों में नमी ठीक दिख रही है। अभी भारी सिंचाई की जरूरत नहीं।",
+        moderate:
+          "नमी मध्यम है। मिट्टी जाँचें और हल्की सिंचाई की योजना बनाएँ।",
+        dry:
+          "नमी कम है। जड़ क्षेत्र में सिंचाई करें और सतह सूखने से बचाएँ।",
+        rainComing:
+          "अगले 2 दिन बारिश की संभावना है। अभी सिंचाई टालें और बारिश के बाद मिट्टी की नमी जाँचें।",
+        unknown: "नमी का सैटेलाइट संकेत उपलब्ध नहीं है।",
+      },
+      windAdvice: {
+        title: "हवा",
+        calm: "हवा सामान्य है। छिड़काव के लिए अनुकूल।",
+        breezy:
+          "हवा तेज़ है। छिड़काव करें तो दिशा का ध्यान रखें और ड्रिफ्ट रोकें।",
+        strong:
+          "तेज़ हवा या झोंके हैं। छिड़काव टालें; पौधों के सहारे और पॉलीहाउस जाँचें।",
+        unknown: "हवा का डेटा उपलब्ध नहीं है।",
+      },
+      crop: {
+        title: "फसल की हरियाली",
+        good: "फसल की हरियाली सामान्य या बेहतर है। नियमित निगरानी रखें।",
+        moderate:
+          "हरियाली में हल्की गिरावट है। पानी, कीट और पोषण की जाँच करें।",
+        poor:
+          "हरियाली कमजोर है। सिंचाई, कीट और रोग की जाँच करें; स्थानीय KVK से सलाह लें।",
+        unknown: "फसल की हरियाली का संकेत उपलब्ध नहीं है।",
+      },
+      notes: {
+        rainComing:
+          "अगले 2 दिन बारिश की संभावना है — सिंचाई या छिड़काव टालें।",
+        drySpell:
+          "अगले 2 दिन बारिश नहीं दिख रही — नमी बनाए रखें।",
+      },
     },
     auth: {
       loginTitle: "वापसी पर स्वागत है",
@@ -50,6 +260,8 @@ export const dictionaries = {
       backToSignIn: "साइन इन पर वापस जाएँ",
       showPassword: "पासवर्ड दिखाएँ",
       hidePassword: "पासवर्ड छिपाएँ",
+      devMode: "डेमो लॉगिन सक्रिय है (Firebase कॉन्फ़िगर नहीं है)।",
+      devCredentials: "ईमेल: demo@kisan.local · पासवर्ड: demo1234",
       firebaseMissing:
         "Firebase सेटअप बाकी है। .env.local में NEXT_PUBLIC_FIREBASE_* मान जोड़ें।",
       errors: {
@@ -70,6 +282,11 @@ export const dictionaries = {
       fallbackName: "किसान",
       mapHeading: "अपना खेत चुनें",
       mapHelp: "नक्शे पर अपने खेत की सीमा बनाएँ या पहले से सहेजा खेत चुनें।",
+      searchPlaceholder: "गाँव, शहर या जगह खोजें",
+      searchButton: "खोजें",
+      searchClear: "खोज साफ़ करें",
+      searchNoResults: "कोई जगह नहीं मिली। दूसरा नाम आज़माएँ।",
+      searchError: "जगह खोज नहीं पा रहे। फिर कोशिश करें।",
       drawHint: "सीमा बनाने के लिए नक्शे के बाएँ कोने में बहुभुज उपकरण चुनें।",
       useLocation: "मेरी लोकेशन उपयोग करें",
       locationUnavailable: "इस ब्राउज़र में लोकेशन उपलब्ध नहीं है।",
@@ -134,12 +351,97 @@ export const dictionaries = {
   en: {
     brand: "Kisan Saathi",
     nav: {
+      label: "Main navigation",
       home: "Home",
       chat: "Advice",
       diagnose: "Crop Health",
       soil: "Soil",
       map: "Map",
       schemes: "Schemes",
+      login: "Login",
+      dashboard: "Dashboard",
+    },
+    home: {
+      eyebrow: "Hindi-first farming advisor",
+      title: "A trusted companion for farming in a changing climate",
+      lede:
+        "Get answers about crops, soil, irrigation and insurance through voice, text, photos and reports.",
+      start: "Start advice",
+      checkCrop: "Check a crop photo",
+      featuresHeading: "Features",
+      features: {
+        planner: {
+          title: "Crop planner",
+          description: "Pick a crop using climate history, weather and mandi prices.",
+        },
+        disease: {
+          title: "Crop disease check",
+          description: "Photo-based likely causes and two remedies, with sources.",
+        },
+        soil: {
+          title: "Soil analysis",
+          description: "Mineral recommendations from a soil-test report.",
+        },
+        map: {
+          title: "Satellite stress map",
+          description: "NDVI, NDMI, temperature and moisture signals for your field.",
+        },
+        schemes: {
+          title: "Government schemes",
+          description: "Information on PMFBY, PM-KISAN, KCC and more.",
+        },
+      },
+      noticeTitle: "Important note",
+      noticeText:
+        "This app gives preliminary advice. Before treating a disease or filing an insurance claim, consult your local Krishi Vigyan Kendra (KVK).",
+    },
+    chat: {
+      eyebrow: "Conversation",
+      title: "Ask about your farm",
+      lede:
+        "Type or speak in Hindi or English. Answers include sources and safety advice.",
+      greeting: "Hello. Ask a question about your crop, weather or a scheme.",
+      farmerExample: "My wheat leaves are turning yellow.",
+      label: "Write your question",
+      placeholder: "Chat is not implemented yet",
+      send: "Send",
+      voice: "Ask by voice",
+      voiceNotReady: "Voice input is not implemented yet",
+      roleFarmer: "Farmer",
+      roleAssistant: "Kisan Saathi",
+    },
+    diagnose: {
+      eyebrow: "Disease doctor",
+      title: "Check a crop from a photo",
+      lede:
+        "See likely causes, a confidence score, two remedies (chemical and organic) and local KVK advice.",
+      uploadLabel: "Choose a photo of the affected leaf or plant",
+      safetyTitle: "Safety rules",
+      safetyText:
+        "Remedies are grounded only in verified agricultural documents. Consult your KVK or an agriculture expert before applying any medicine.",
+    },
+    soil: {
+      eyebrow: "Soil analyst",
+      title: "Upload a soil-test report",
+      lede: "Mineral values will be read from a PDF or photo and turned into suggestions.",
+      uploadLabel: "Choose a soil-test report",
+      pending: "Report reading and mineral recommendations are not implemented yet.",
+    },
+    schemes: {
+      eyebrow: "Scheme advisor",
+      title: "Government scheme information",
+      lede:
+        "Eligibility hints, required documents and insurance-claim steps will come from verified documents.",
+      questionLabel: "Ask about a scheme",
+      placeholder: "Example: How do I file a PMFBY claim?",
+      search: "Find an answer",
+      pending: "RAG retrieval and answer generation are not implemented yet.",
+    },
+    map: {
+      eyebrow: "Stress monitor",
+      title: "Satellite crop-stress map",
+      lede:
+        "View Sentinel-2 NDVI, comparison with the 3-year average (anomaly), leaf moisture (NDMI) and Sentinel-3 land temperature.",
     },
     footer: "Kisan Saathi — a climate-resilient farming companion",
     common: {
@@ -147,6 +449,132 @@ export const dictionaries = {
       loading: "Loading...",
       optional: "Optional",
       switchLanguage: "Switch language",
+      notImplemented: "Upload and analysis are not implemented yet.",
+    },
+    stress: {
+      field: "Choose a field",
+      noFields: "Save a field on the dashboard first.",
+      goToDashboard: "Open dashboard",
+      loginRequired: "Log in and save a field on the dashboard to view the map.",
+      goToLogin: "Log in",
+      dateFrom: "From date",
+      dateTo: "To date",
+      load: "Show map",
+      loading: "Loading satellite data...",
+      error: "Could not build the map. Please try again.",
+      empty:
+        "No clear satellite image in this period. Try a longer date range.",
+      layers: {
+        ndvi: "NDVI",
+        anomaly: "NDVI anomaly",
+        ndmi: "NDMI",
+        lst: "Land temp",
+      },
+      layerHint: {
+        ndvi: "Green = dense healthy crop, red = sparse vegetation.",
+        anomaly: "Green = better than the same period in the last 3 years, red = weaker.",
+        ndmi: "Green = more leaf moisture, red = moisture deficit.",
+        lst: "Green = cooler surface, red = hotter surface.",
+      },
+      metricsTitle: "Field values for this period",
+      metricNdvi: "Average NDVI",
+      metricAnomaly: "NDVI anomaly",
+      metricNdmi: "Average NDMI",
+      metricLst: "Land surface temp",
+      metricSoil: "Soil moisture",
+      baseline: "3-year baseline",
+      unavailable: "Unavailable",
+      soilUnavailable:
+        "A satellite soil-moisture source is not connected yet. Use NDMI as a moisture signal.",
+      explainTitle: "What does this map mean?",
+      explainNdvi:
+        "NDVI shows how green and dense the crop is. Above 0.6 is usually good; below 0.3 may indicate stress.",
+      explainAnomaly:
+        "NDVI anomaly compares this period with the same window in the last 3 years. Around zero = normal; negative = weaker than expected.",
+      explainNdmi:
+        "NDMI shows leaf moisture. Above 0.3 is usually fine; below 0.1 suggests dryness.",
+      explainLst:
+        "Land surface temperature comes from Sentinel-3 (1 km resolution, daytime overpass only). A hotter surface can indicate water shortage or stress.",
+      explainCloud:
+        "Empty or transparent areas are caused by clouds or no satellite pass that day. Try a longer date range.",
+      legendLow: "Low",
+      legendHigh: "High",
+      legendTempLow: "Cooler",
+      legendTempHigh: "Hotter",
+      disclaimer:
+        "Satellite data is advisory evidence only, not proof of loss.",
+    },
+    fieldAdvisory: {
+      title: "Field environment advice",
+      subtitle:
+        "Suggestions for today from satellite and weather signals. This is not proof of loss.",
+      metricsLoading: "Analyzing satellite data for this field...",
+      metricsError:
+        "Satellite data is unavailable. Weather advice is shown below.",
+      metricsHint:
+        "Load the map above to get satellite advice on heat, moisture and crop vigor.",
+      weatherLoading: "Loading weather...",
+      weatherError: "Weather data is unavailable.",
+      nowTitle: "Weather now",
+      temperature: "Temp",
+      humidity: "Humidity",
+      windLabel: "Wind",
+      rainLabel: "Rain",
+      weatherSource: "Weather: Open-Meteo",
+      satelliteSource: "Satellite: Copernicus Sentinel",
+      severity: {
+        good: "OK",
+        watch: "Watch",
+        alert: "Alert",
+        neutral: "No data",
+      },
+      heat: {
+        title: "Heat",
+        normal:
+          "Surface temperature is normal. Continue routine irrigation and monitoring.",
+        moderate:
+          "The surface is warm. Irrigate in the morning or evening and use mulch to hold moisture.",
+        high:
+          "Heat is high. Avoid midday spraying or fertilizer; focus on irrigation and shade/mulch.",
+        unknown: "Land surface temperature is unavailable.",
+      },
+      water: {
+        title: "Water / moisture",
+        adequate:
+          "Leaf moisture looks adequate. Heavy irrigation is not needed right now.",
+        moderate:
+          "Moisture is moderate. Check the soil and plan light irrigation.",
+        dry:
+          "Moisture is low. Irrigate the root zone and prevent the surface from drying out.",
+        rainComing:
+          "Rain is likely in the next 2 days. Delay irrigation and check soil moisture after the rain.",
+        unknown: "The satellite moisture signal is unavailable.",
+      },
+      windAdvice: {
+        title: "Wind",
+        calm: "Wind is normal. Conditions are suitable for spraying.",
+        breezy:
+          "Wind is breezy. If spraying, watch the direction and prevent drift.",
+        strong:
+          "Strong wind or gusts. Delay spraying; check plant supports and polyhouses.",
+        unknown: "Wind data is unavailable.",
+      },
+      crop: {
+        title: "Crop vigor",
+        good:
+          "Crop greenness is normal or better. Keep monitoring regularly.",
+        moderate:
+          "Greenness has dipped slightly. Check water, pests and nutrition.",
+        poor:
+          "Greenness is weak. Check irrigation, pests and disease; consult your local KVK.",
+        unknown: "The crop-vigor signal is unavailable.",
+      },
+      notes: {
+        rainComing:
+          "Rain is likely in the next 2 days — delay irrigation or spraying.",
+        drySpell:
+          "No rain is showing in the next 2 days — maintain moisture.",
+      },
     },
     auth: {
       loginTitle: "Welcome Back",
@@ -178,6 +606,8 @@ export const dictionaries = {
       backToSignIn: "Back to sign in",
       showPassword: "Show password",
       hidePassword: "Hide password",
+      devMode: "Demo login is active because Firebase is not configured.",
+      devCredentials: "Email: demo@kisan.local · Password: demo1234",
       firebaseMissing:
         "Firebase is not set up yet. Add NEXT_PUBLIC_FIREBASE_* values in .env.local.",
       errors: {
@@ -198,6 +628,11 @@ export const dictionaries = {
       fallbackName: "Farmer",
       mapHeading: "Choose your field",
       mapHelp: "Draw your field boundary on the map or pick a saved field.",
+      searchPlaceholder: "Search a village, town or place",
+      searchButton: "Search",
+      searchClear: "Clear search",
+      searchNoResults: "No place found. Try a different name.",
+      searchError: "Could not search places. Please try again.",
       drawHint: "Use the polygon tool in the map's top-left corner to draw.",
       useLocation: "Use my location",
       locationUnavailable: "Location is not available in this browser.",

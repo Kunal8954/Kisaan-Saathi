@@ -16,7 +16,7 @@ export function AuthCard({ title, subtitle, children }: AuthCardProps) {
     <div className={styles.shell}>
       <div className={styles.brandRow}>
         <p className={styles.brand}>Kisan Saathi</p>
-        <LanguageToggle className={styles.languageButton} />
+        <LanguageToggle />
       </div>
       <section className={styles.card} aria-labelledby="auth-title">
         <h1 id="auth-title" className={styles.title}>

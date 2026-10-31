@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AdviceCard } from "@/components/AdviceCard";
 import { useAuth } from "@/components/AuthProvider";
+import { FieldEnvironment } from "@/components/FieldEnvironment";
 import { FieldForm } from "@/components/FieldForm";
 import { FieldList } from "@/components/FieldList";
 import { FieldMap } from "@/components/FieldMap";
@@ -184,7 +185,7 @@ export default function DashboardPage() {
             <span className={styles.userName}>
               {user.displayName || t.dashboard.fallbackName}
             </span>
-            <LanguageToggle className={styles.languageButton} />
+            <LanguageToggle />
             <button
               type="button"
               className={styles.logoutButton}
@@ -223,6 +224,7 @@ export default function DashboardPage() {
             onSelect={handleSelect}
             onDelete={handleDelete}
           />
+          {selectedField ? <FieldEnvironment field={selectedField} /> : null}
           <IssuePicker
             disabled={!selectedField}
             loading={adviceLoading}

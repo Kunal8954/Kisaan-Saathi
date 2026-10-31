@@ -81,6 +81,29 @@ a {
   border-color: var(--green-700);
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.nav-auth {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--green-700);
+  border-radius: 999px;
+  color: var(--green-900);
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.nav-auth:hover,
+.nav-auth:focus-visible {
+  background: var(--green-700);
+  color: #ffffff;
+}
+
 .page {
   width: min(1080px, 100%);
   margin: 0 auto;
@@ -357,6 +380,10 @@ textarea {
   height: 10px;
   border-radius: 999px;
   background: linear-gradient(90deg, #4c9a61, #f2c14e, #c0392b);
+}
+
+.legend-gradient-reverse {
+  background: linear-gradient(90deg, #c0392b, #f2c14e, #4c9a61);
 }
 
 .metrics {

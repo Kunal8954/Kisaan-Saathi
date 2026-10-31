@@ -1,31 +1,24 @@
-import type { Metadata } from "next";
+"use client";
 
 import { PhotoUpload } from "@/components/PhotoUpload";
-
-export const metadata: Metadata = {
-  title: "फसल रोग जाँच",
-};
+import { useI18n } from "@/lib/locale";
 
 export default function DiagnosePage() {
+  const { t } = useI18n();
+
   return (
     <>
       <header className="page-heading">
-        <p className="eyebrow">रोग डॉक्टर</p>
-        <h1>फसल की फोटो से जाँच</h1>
-        <p>
-          संभावित कारण, भरोसा स्कोर, दो उपाय (रासायनिक और जैविक) और स्थानीय KVK
-          सलाह दिखाई जाएगी।
-        </p>
+        <p className="eyebrow">{t.diagnose.eyebrow}</p>
+        <h1>{t.diagnose.title}</h1>
+        <p>{t.diagnose.lede}</p>
       </header>
 
       <section className="panel">
-        <PhotoUpload label="प्रभावित पत्ती या पौधे की फोटो चुनें" />
+        <PhotoUpload label={t.diagnose.uploadLabel} />
         <div className="notice">
-          <h2>सुरक्षा नियम</h2>
-          <p>
-            उपाय केवल प्रमाणित कृषि दस्तावेजों से दिए जाएँगे। कोई भी दवा लगाने से
-            पहले अपने KVK या कृषि विशेषज्ञ से सलाह लें।
-          </p>
+          <h2>{t.diagnose.safetyTitle}</h2>
+          <p>{t.diagnose.safetyText}</p>
         </div>
       </section>
     </>

@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { useI18n } from "@/lib/locale";
+
 const chromelessRoutes = new Set([
   "/login",
   "/signup",
@@ -13,11 +15,11 @@ const chromelessRoutes = new Set([
 interface AppChromeProps {
   children: ReactNode;
   header: ReactNode;
-  footer: string;
 }
 
-export function AppChrome({ children, header, footer }: AppChromeProps) {
+export function AppChrome({ children, header }: AppChromeProps) {
   const pathname = usePathname();
+  const { t } = useI18n();
 
   if (chromelessRoutes.has(pathname)) {
     return <>{children}</>;
@@ -27,7 +29,7 @@ export function AppChrome({ children, header, footer }: AppChromeProps) {
     <>
       {header}
       <main className="page">{children}</main>
-      <footer className="site-footer">{footer}</footer>
+      <footer className="site-footer">{t.footer}</footer>
     </>
   );
 }

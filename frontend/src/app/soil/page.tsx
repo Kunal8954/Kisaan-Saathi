@@ -1,28 +1,25 @@
-import type { Metadata } from "next";
+"use client";
 
 import { PhotoUpload } from "@/components/PhotoUpload";
-
-export const metadata: Metadata = {
-  title: "मिट्टी विश्लेषण",
-};
+import { useI18n } from "@/lib/locale";
 
 export default function SoilPage() {
+  const { t } = useI18n();
+
   return (
     <>
       <header className="page-heading">
-        <p className="eyebrow">मिट्टी विश्लेषक</p>
-        <h1>मिट्टी परीक्षण रिपोर्ट अपलोड करें</h1>
-        <p>PDF या फोटो से खनिज मान निकालकर सुझाव तैयार किए जाएँगे।</p>
+        <p className="eyebrow">{t.soil.eyebrow}</p>
+        <h1>{t.soil.title}</h1>
+        <p>{t.soil.lede}</p>
       </header>
 
       <section className="panel">
         <PhotoUpload
-          label="मिट्टी परीक्षण रिपोर्ट चुनें"
+          label={t.soil.uploadLabel}
           accept="application/pdf,image/jpeg,image/png"
         />
-        <p className="muted">
-          रिपोर्ट पढ़ने और खनिज सिफारिशों का कार्यान्वयन अभी बाकी है।
-        </p>
+        <p className="muted">{t.soil.pending}</p>
       </section>
     </>
   );

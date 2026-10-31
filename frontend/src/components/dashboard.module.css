@@ -175,11 +175,144 @@
 .mapControl {
   position: absolute;
   z-index: 1000;
-  top: 10px;
   right: 10px;
+  bottom: 10px;
   display: grid;
   justify-items: end;
   gap: 6px;
+}
+
+.mapSearch {
+  position: absolute;
+  z-index: 1000;
+  top: 10px;
+  left: 50%;
+  width: min(380px, calc(100% - 120px));
+  transform: translateX(-50%);
+}
+
+.mapSearchForm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px 5px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #6b7280;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.mapSearchInput {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #111827;
+  font: inherit;
+  font-size: 13px;
+}
+
+.mapSearchInput::placeholder {
+  color: #9ca3af;
+}
+
+.mapSearchSubmit {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: #3b63e0;
+  color: #ffffff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mapSearchSubmit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.mapSearchClear {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 6px;
+  background: #f3f4f6;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.mapSearchClear:hover {
+  background: #e5e7eb;
+}
+
+.mapSearchResults {
+  max-height: 280px;
+  margin-top: 6px;
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+}
+
+.mapSearchResult {
+  display: block;
+  width: 100%;
+  padding: 9px 11px;
+  border: 0;
+  border-bottom: 1px solid #f1f5f9;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mapSearchResult:last-child {
+  border-bottom: 0;
+}
+
+.mapSearchResult:hover,
+.mapSearchResult:focus-visible {
+  background: #eff4ff;
+  outline: none;
+}
+
+.mapSearchResultName {
+  display: block;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mapSearchResultDetail {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: #6b7280;
+  font-size: 11px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mapSearchMessage {
+  margin: 0;
+  padding: 10px 11px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .mapSearch {
+    width: calc(100% - 20px);
+  }
 }
 
 .locateButton {
@@ -616,6 +749,31 @@
   font-size: 10px;
 }
 
+.stressDates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stressStatus {
+  margin: 12px 0 0;
+  color: #b91c1c;
+  font-size: 14px;
+}
+
+.stressSummary {
+  margin: 12px 0 0;
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.stressDisclaimer {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
 @media (min-width: 560px) {
   .adviceGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -634,5 +792,117 @@
 
   .mapLoading {
     height: 480px;
+  }
+}
+
+.layerTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.layerTab {
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #fff;
+  color: #374151;
+  padding: 7px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.layerTabActive {
+  border-color: #1f6f43;
+  background: #1f6f43;
+  color: #fff;
+}
+
+.stressMetrics {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.stressMetricsTitle {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #111827;
+}
+
+.stressMetricsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.stressMetricsGrid div {
+  padding: 10px;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.stressMetricsGrid dt {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.stressMetricsGrid dd {
+  margin: 4px 0 0;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.stressMetricsGrid small {
+  display: block;
+  margin-top: 4px;
+  color: #6b7280;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.stressMetricWide {
+  grid-column: 1 / -1;
+}
+
+.stressUnavailable {
+  color: #b45309 !important;
+  font-size: 14px !important;
+}
+
+.stressExplain {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.stressExplain summary {
+  color: #1f6f43;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stressExplain ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.stressExplain li + li {
+  margin-top: 6px;
+}
+
+@media (min-width: 720px) {
+  .stressMetricsGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

@@ -1,4 +1,8 @@
+"use client";
+
 import type { ReactNode } from "react";
+
+import { useI18n } from "@/lib/locale";
 
 type ChatBubbleProps = {
   role: "farmer" | "assistant";
@@ -6,10 +10,12 @@ type ChatBubbleProps = {
 };
 
 export function ChatBubble({ role, children }: ChatBubbleProps) {
+  const { t } = useI18n();
+
   return (
     <div className={`chat-bubble chat-bubble-${role}`}>
       <span className="chat-role">
-        {role === "farmer" ? "किसान" : "किसान साथी"}
+        {role === "farmer" ? t.chat.roleFarmer : t.chat.roleAssistant}
       </span>
       <p>{children}</p>
     </div>

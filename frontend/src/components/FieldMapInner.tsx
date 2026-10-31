@@ -10,6 +10,7 @@ import { MapContainer, Polygon, TileLayer, useMap } from "react-leaflet";
 import type { Feature, Polygon as GeoJSONPolygon } from "geojson";
 import "@geoman-io/leaflet-geoman-free";
 
+import { MapSearch } from "@/components/MapSearch";
 import type { Field, FieldGeometry } from "@/lib/fieldsStore";
 import { useI18n } from "@/lib/locale";
 
@@ -271,6 +272,7 @@ export function FieldMapInner({
             />
           )}
 
+          <MapSearch />
           <MapEvents
             draftLayerRef={draftLayerRef}
             draftActive={draftActive}

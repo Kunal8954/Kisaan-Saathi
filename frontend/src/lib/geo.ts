@@ -53,3 +53,25 @@ export function formatArea(value: number): string {
     maximumFractionDigits: 2,
   });
 }
+
+export function centroidOfGeometry(geometry: FieldGeometry): {
+  latitude: number;
+  longitude: number;
+} {
+  const ring = geometry.coordinates[0] ?? [];
+  const points = ring.slice(0, -1).length > 0 ? ring.slice(0, -1) : ring;
+  if (points.length === 0) {
+    return { latitude: 0, longitude: 0 };
+  }
+  const totals = points.reduce(
+    (sum, [longitude, latitude]) => ({
+      latitude: sum.latitude + latitude,
+      longitude: sum.longitude + longitude,
+    }),
+    { latitude: 0, longitude: 0 }
+  );
+  return {
+    latitude: totals.latitude / points.length,
+    longitude: totals.longitude / points.length,
+  };
+}

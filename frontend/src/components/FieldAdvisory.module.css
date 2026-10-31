@@ -1,0 +1,189 @@
+.section {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title {
+  margin: 0;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.weather {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.weatherHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.weatherTitle {
+  margin: 0;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.weatherGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0 0;
+}
+
+.weatherGrid div {
+  padding: 8px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.weatherGrid dt {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.weatherGrid dd {
+  margin: 2px 0 0;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.card {
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-left-width: 4px;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.card h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.card p {
+  margin: 6px 0 0;
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.card .note {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #475569;
+}
+
+.badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.good {
+  border-left-color: #10b981;
+}
+
+.good .badge {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.watch {
+  border-left-color: #f59e0b;
+}
+
+.watch .badge {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.alert {
+  border-left-color: #ef4444;
+}
+
+.alert .badge {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.neutral {
+  border-left-color: #9ca3af;
+}
+
+.neutral .badge {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.muted {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.source {
+  margin: 10px 0 0;
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+@media (max-width: 640px) {
+  .weatherGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}

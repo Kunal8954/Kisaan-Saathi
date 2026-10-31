@@ -15,15 +15,22 @@ import { TextField } from "@/components/TextField";
 import styles from "@/components/auth.module.css";
 import { useAuth } from "@/components/AuthProvider";
 import { mapAuthError } from "@/lib/authErrors";
+import {
+  DEV_TEST_EMAIL,
+  DEV_TEST_PASSWORD,
+  isDevAuthEnabled,
+} from "@/lib/devAuth";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { useI18n } from "@/lib/locale";
 
 export default function LoginPage() {
   const router = useRouter();
   const { t, locale } = useI18n();
-  const { user, loading, configured } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { user, loading, configured, signInDev } = useAuth();
+  const devMode = isDevAuthEnabled;
+  const canSignIn = configured || devMode;
+  const [email, setEmail] = useState(devMode ? DEV_TEST_EMAIL : "");
+  const [password, setPassword] = useState(devMode ? DEV_TEST_PASSWORD : "");
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -39,7 +46,23 @@ export default function LoginPage() {
     setError(null);
 
     if (!configured) {
-      setError(t.auth.firebaseMissing);
+      if (!devMode) {
+        setError(t.auth.firebaseMissing);
+        return;
+      }
+      if (!email.trim()) {
+        setError(t.auth.errors.invalidEmail);
+        return;
+      }
+      setSubmitting(true);
+      try {
+        signInDev(email.trim(), password);
+        router.replace("/dashboard");
+      } catch {
+        setError(t.auth.errors.wrongCredentials);
+      } finally {
+        setSubmitting(false);
+      }
       return;
     }
 
@@ -76,7 +99,9 @@ export default function LoginPage() {
     <AuthCard title={t.auth.loginTitle} subtitle={t.auth.loginSubtitle}>
       {!configured ? (
         <p className={styles.info} role="status">
-          {t.auth.firebaseMissing}
+          {devMode
+            ? `${t.auth.devMode} ${t.auth.devCredentials}`
+            : t.auth.firebaseMissing}
         </p>
       ) : null}
       {error ? (
@@ -95,7 +120,7 @@ export default function LoginPage() {
           placeholder={t.auth.emailPlaceholder}
           autoComplete="email"
           icon="mail"
-          disabled={!configured}
+          disabled={!canSignIn}
         />
         <TextField
           id="login-password"
@@ -106,7 +131,7 @@ export default function LoginPage() {
           placeholder={t.auth.passwordPlaceholder}
           autoComplete="current-password"
           icon="lock"
-          disabled={!configured}
+          disabled={!canSignIn}
         />
 
         <div className={styles.row}>
@@ -115,7 +140,7 @@ export default function LoginPage() {
               type="checkbox"
               checked={remember}
               onChange={(event) => setRemember(event.target.checked)}
-              disabled={!configured}
+              disabled={!canSignIn}
             />
             {t.auth.remember}
           </label>
@@ -127,16 +152,20 @@ export default function LoginPage() {
         <button
           type="submit"
           className={styles.buttonPrimary}
-          disabled={!configured || submitting}
+          disabled={!canSignIn || submitting}
         >
           {submitting ? t.auth.signingIn : t.auth.signIn}
         </button>
       </form>
 
-      <div className={styles.divider}>{t.auth.noAccount}</div>
-      <Link className={styles.buttonSecondary} href="/signup">
-        {t.auth.createAccount}
-      </Link>
+      {devMode ? null : (
+        <>
+          <div className={styles.divider}>{t.auth.noAccount}</div>
+          <Link className={styles.buttonSecondary} href="/signup">
+            {t.auth.createAccount}
+          </Link>
+        </>
+      )}
     </AuthCard>
   );
 }

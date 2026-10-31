@@ -11,6 +11,7 @@ RUN useradd --create-home --uid 10001 appuser
 
 COPY pyproject.toml ./
 COPY app ./app
+COPY heatmap_server.py ./
 
 RUN pip install --upgrade pip && pip install .
 
