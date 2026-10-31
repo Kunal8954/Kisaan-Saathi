@@ -1,0 +1,518 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.tabsRow {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 2px;
+  overflow-x: auto;
+}
+
+.tabBtn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #4b5563;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tabBtn:hover {
+  color: #15803d;
+}
+
+.tabBtnActive {
+  color: #15803d;
+  border-bottom-color: #15803d;
+}
+
+/* Search and Filters */
+.searchWrap {
+  position: relative;
+  width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 16px 12px 42px;
+  font-size: 1rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 12px;
+  outline: none;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.searchInput:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+}
+
+.chipsList {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.chipBtn {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chipBtn:hover {
+  background: #e5e7eb;
+}
+
+.chipBtnActive {
+  background: #15803d;
+  border-color: #15803d;
+  color: white;
+}
+
+/* Schemes Cards Grid */
+.schemesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1.25rem;
+}
+
+.schemeCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1.25rem 1.4rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.schemeCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.categoryPill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.pillInsurance {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.pillIncome {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.pillCredit {
+  background: #fefce8;
+  color: #854d0e;
+}
+
+.pillOther {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.schemeName {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.schemeTagline {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #15803d;
+  margin: 0;
+}
+
+.schemeDesc {
+  font-size: 0.85rem;
+  color: #4b5563;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.bulletList {
+  padding-left: 1.2rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: #374151;
+}
+
+.bulletList li {
+  line-height: 1.35;
+}
+
+.cardFooter {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.portalLink {
+  color: #15803d;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.portalLink:hover {
+  text-decoration: underline;
+}
+
+.helplineText {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* Eligibility Checker */
+.checkerCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formLabel {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.formInput,
+.formSelect {
+  padding: 10px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.formInput:focus,
+.formSelect:focus {
+  border-color: #16a34a;
+}
+
+.formHint {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.submitBtn {
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.submitBtn:hover {
+  background: #15803d;
+}
+
+.resultsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.resultCard {
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resultEligible {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.resultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.resultTitle {
+  font-weight: 800;
+  font-size: 1rem;
+  color: #111827;
+  margin: 0;
+}
+
+.resultBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.benefitText {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #15803d;
+  margin: 0;
+}
+
+.reasonText {
+  font-size: 0.85rem;
+  color: #374151;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.nextStepBox {
+  font-size: 0.82rem;
+  color: #166534;
+  background: rgba(22, 101, 52, 0.08);
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+/* PMFBY Claim Assistance */
+.claimContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.emergencyBanner {
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 6px 18px rgba(185, 28, 28, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.emergencyTitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emergencyText {
+  font-size: 0.95rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.dialBtn {
+  background: white;
+  color: #991b1b;
+  font-weight: 800;
+  padding: 10px 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+
+.dialBtn:hover {
+  background: #fee2e2;
+}
+
+.appLinkBtn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+
+.appLinkBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.stepsCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stepItem {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.stepNumber {
+  background: #15803d;
+  color: white;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.stepText {
+  font-size: 0.88rem;
+  color: #374151;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Q&A Section */
+.qaWrap {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.quickChips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.quickChip {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  border-radius: 9999px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.quickChip:hover {
+  background: #dcfce7;
+}
+
+.answerBox {
+  background: #f9fafb;
+  border-left: 4px solid #16a34a;
+  border-radius: 0 10px 10px 0;
+  padding: 14px 16px;
+  font-size: 0.92rem;
+  color: #1f2937;
+  line-height: 1.5;
+  white-space: pre-line;
+}

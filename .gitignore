@@ -48,5 +48,6 @@ data/**/*.json
 
 # Generated reports and uploads
 uploads/
-reports/
+/reports/
+data/reports/
 *.generated.pdf

@@ -215,9 +215,7 @@ async def get_token(client: httpx.AsyncClient) -> str:
     client_id = os.getenv("CDSE_CLIENT_ID")
     client_secret = os.getenv("CDSE_CLIENT_SECRET")
     if not client_id or not client_secret:
-        raise HTTPException(
-            500, "Server is missing CDSE_CLIENT_ID or CDSE_CLIENT_SECRET in .env"
-        )
+        raise HTTPException(500, "Server is missing CDSE_CLIENT_ID or CDSE_CLIENT_SECRET in .env")
     r = await client.post(
         TOKEN_URL,
         data={
@@ -227,18 +225,14 @@ async def get_token(client: httpx.AsyncClient) -> str:
         },
     )
     if r.status_code != 200:
-        raise HTTPException(
-            502, "Copernicus login failed. Check the client id and secret."
-        )
+        raise HTTPException(502, "Copernicus login failed. Check the client id and secret.")
     j = r.json()
     _token.value = str(j["access_token"])
     _token.exp = time.time() + float(j.get("expires_in", 300))
     return _token.value
 
 
-async def _fetch_field_weather(
-    lat: float, lon: float
-) -> tuple[float, float, float, float]:
+async def _fetch_field_weather(lat: float, lon: float) -> tuple[float, float, float, float]:
     """Fetch current ambient temperature, humidity, rain and soil moisture."""
     params: dict[str, str | int | float] = {
         "latitude": lat,
@@ -258,9 +252,7 @@ async def _fetch_field_weather(
             humid = float(curr.get("relative_humidity_2m", 55.0))
             rain = float(curr.get("precipitation", 0.0))
             hourly_soil = data.get("hourly", {}).get("soil_moisture_0_to_7cm") or []
-            soil_pct = (
-                float(hourly_soil[0]) * 100.0 if hourly_soil else 24.0
-            )  # m3/m3 to %
+            soil_pct = float(hourly_soil[0]) * 100.0 if hourly_soil else 24.0  # m3/m3 to %
             return temp, humid, rain, max(10.0, min(60.0, soil_pct))
     except Exception:
         pass
@@ -416,9 +408,7 @@ async def heatmap(req: HeatmapRequest) -> dict[str, Any]:
                 "bounds": {
                     "bbox": [west, south, east, north],
                     "geometry": geom,
-                    "properties": {
-                        "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-                    },
+                    "properties": {"crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"},
                 },
                 "data": [
                     {
@@ -499,3 +489,27 @@ def health() -> dict[str, bool]:
 
 
 app.include_router(router)
+app.include_router(router, prefix="/api")
+
+try:
+    from app.api.routes import geocode as geocode_module
+    from app.api.routes import places as places_module
+    from app.api.routes import reports as reports_module
+    from app.api.routes import schemes as schemes_module
+    from app.api.routes import soil as soil_module
+    from app.api.routes import weather as weather_module
+
+    app.include_router(weather_module.router, prefix="/api")
+    app.include_router(weather_module.router)
+    app.include_router(geocode_module.router, prefix="/api")
+    app.include_router(geocode_module.router)
+    app.include_router(soil_module.router, prefix="/api")
+    app.include_router(soil_module.router)
+    app.include_router(schemes_module.router, prefix="/api")
+    app.include_router(schemes_module.router)
+    app.include_router(reports_module.router, prefix="/api")
+    app.include_router(reports_module.router)
+    app.include_router(places_module.router, prefix="/api")
+    app.include_router(places_module.router)
+except Exception:
+    pass

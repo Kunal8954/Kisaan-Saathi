@@ -169,9 +169,7 @@ async def search_places(
         "accept-language": "hi,en",
     }
     try:
-        async with httpx.AsyncClient(
-            timeout=10, headers={"User-Agent": USER_AGENT}
-        ) as client:
+        async with httpx.AsyncClient(timeout=10, headers={"User-Agent": USER_AGENT}) as client:
             response = await client.get(NOMINATIM_URL, params=params)
         if response.status_code == 200:
             payload = response.json()

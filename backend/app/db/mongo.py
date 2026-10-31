@@ -7,7 +7,7 @@ a repository actually needs the database.
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from app.config import get_settings
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 @lru_cache
-def get_client() -> AsyncIOMotorClient:
+def get_client() -> AsyncIOMotorClient[Any]:
     """Create and cache the process-wide MongoDB client."""
 
     from motor.motor_asyncio import AsyncIOMotorClient
@@ -31,7 +31,7 @@ def get_client() -> AsyncIOMotorClient:
     )
 
 
-def get_database() -> AsyncIOMotorDatabase:
+def get_database() -> AsyncIOMotorDatabase[Any]:
     """Return the configured application database."""
 
     return get_client()[get_settings().mongodb_db]

@@ -17,6 +17,8 @@ export function NavBar() {
     { href: "/soil", label: t.nav.soil },
     { href: "/map", label: t.nav.map },
     { href: "/schemes", label: t.nav.schemes },
+    { href: "/reports", label: t.nav.reports },
+    { href: "/places", label: t.nav.places },
   ];
 
   return (

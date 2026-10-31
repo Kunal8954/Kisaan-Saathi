@@ -50,21 +50,51 @@ def test_shift_window_clamps_leap_day() -> None:
 def test_extract_median_skips_nan_and_nodata() -> None:
     payload = {
         "data": [
-            {"outputs": {"data": {"bands": {"B0": {"stats": {
-                "sampleCount": 100,
-                "noDataCount": 0,
-                "percentiles": {"50.0": 0.6},
-            }}}}}},
-            {"outputs": {"data": {"bands": {"B0": {"stats": {
-                "sampleCount": 100,
-                "noDataCount": 100,
-                "percentiles": {"50.0": "NaN"},
-            }}}}}},
-            {"outputs": {"data": {"bands": {"B0": {"stats": {
-                "sampleCount": 100,
-                "noDataCount": 50,
-                "percentiles": {"50.0": 0.3},
-            }}}}}},
+            {
+                "outputs": {
+                    "data": {
+                        "bands": {
+                            "B0": {
+                                "stats": {
+                                    "sampleCount": 100,
+                                    "noDataCount": 0,
+                                    "percentiles": {"50.0": 0.6},
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "outputs": {
+                    "data": {
+                        "bands": {
+                            "B0": {
+                                "stats": {
+                                    "sampleCount": 100,
+                                    "noDataCount": 100,
+                                    "percentiles": {"50.0": "NaN"},
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "outputs": {
+                    "data": {
+                        "bands": {
+                            "B0": {
+                                "stats": {
+                                    "sampleCount": 100,
+                                    "noDataCount": 50,
+                                    "percentiles": {"50.0": 0.3},
+                                }
+                            }
+                        }
+                    }
+                }
+            },
         ]
     }
 
@@ -144,4 +174,3 @@ def test_heatmap_returns_image_and_proper_metrics() -> None:
     assert isinstance(metrics["land_surface_temperature_c"], float)
     assert isinstance(metrics["soil_moisture"], float)
     assert len(metrics["baseline_years"]) == 3
-

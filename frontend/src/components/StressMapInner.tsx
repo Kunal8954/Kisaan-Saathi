@@ -34,18 +34,56 @@ function toLeafletPositions(geometry: FieldGeometry): [number, number][] {
   return (geometry.coordinates[0] ?? []).map(([lng, lat]) => [lat, lng]);
 }
 
-function readLayer(layer: L.Layer, onChange: (geometry: FieldGeometry) => void) {
-  if (!(layer instanceof L.Polygon)) {
-    return;
+function extractPolygonCoordinates(layer: unknown): [number, number][][] | null {
+  if (!layer || typeof layer !== "object") return null;
+
+  // 1. Try toGeoJSON()
+  if (typeof (layer as { toGeoJSON?: () => Feature }).toGeoJSON === "function") {
+    try {
+      const geo = (layer as { toGeoJSON: () => Feature }).toGeoJSON();
+      if (geo?.geometry?.type === "Polygon" && Array.isArray(geo.geometry.coordinates)) {
+        const ring = geo.geometry.coordinates[0];
+        if (Array.isArray(ring) && ring.length >= 3) {
+          const first = ring[0];
+          const last = ring[ring.length - 1];
+          const closed = [...ring];
+          if (first[0] !== last[0] || first[1] !== last[1]) {
+            closed.push([first[0], first[1]]);
+          }
+          return [closed as [number, number][]];
+        }
+      }
+    } catch {
+      // ignore
+    }
   }
-  const geoJson = layer.toGeoJSON() as Feature<GeoJSONPolygon>;
-  if (geoJson.geometry.type !== "Polygon") {
-    return;
+
+  // 2. Try getLatLngs()
+  if (typeof (layer as { getLatLngs?: () => unknown }).getLatLngs === "function") {
+    try {
+      let latlngs = (layer as { getLatLngs: () => unknown }).getLatLngs();
+      if (Array.isArray(latlngs) && latlngs.length > 0) {
+        if (Array.isArray(latlngs[0])) {
+          latlngs = latlngs[0];
+        }
+        const ring: [number, number][] = (latlngs as { lat: number; lng: number }[]).map(
+          (p) => [p.lng, p.lat]
+        );
+        if (ring.length >= 3) {
+          const first = ring[0];
+          const last = ring[ring.length - 1];
+          if (first[0] !== last[0] || first[1] !== last[1]) {
+            ring.push([first[0], first[1]]);
+          }
+          return [ring];
+        }
+      }
+    } catch {
+      // ignore
+    }
   }
-  onChange({
-    type: "Polygon",
-    coordinates: geoJson.geometry.coordinates as FieldGeometry["coordinates"],
-  });
+
+  return null;
 }
 
 function GeomanDrawEvents({
@@ -90,21 +128,37 @@ function GeomanDrawEvents({
 
     const handleCreate = (event: { layer: L.Layer }) => {
       const layer = event.layer;
-      if (!(layer instanceof L.Polygon)) {
-        layer.remove();
+      const coords = extractPolygonCoordinates(layer);
+      if (!coords) {
         return;
       }
 
       if (drawnLayerRef.current && drawnLayerRef.current !== layer) {
-        drawnLayerRef.current.remove();
+        try {
+          drawnLayerRef.current.remove();
+        } catch {
+          // ignore
+        }
       }
 
-      drawnLayerRef.current = layer;
-      readLayer(layer, (geometry) => changeRef.current(geometry));
-
-      layer.on("pm:edit", () => {
-        readLayer(layer, (geometry) => changeRef.current(geometry));
+      drawnLayerRef.current = layer as L.Polygon;
+      changeRef.current({
+        type: "Polygon",
+        coordinates: coords,
       });
+
+      const handleEdit = () => {
+        const updated = extractPolygonCoordinates(layer);
+        if (updated) {
+          changeRef.current({
+            type: "Polygon",
+            coordinates: updated,
+          });
+        }
+      };
+
+      layer.on("pm:edit", handleEdit);
+      layer.on("pm:dragend", handleEdit);
     };
 
     const handleRemove = (event: { layer: L.Layer }) => {
@@ -214,6 +268,34 @@ export function StressMapInner({
   const positions = geometry ? toLeafletPositions(geometry) : [];
   const center: [number, number] = positions[0] ?? [29.6857, 76.9905]; // Default to Indian agricultural belt (Karnal)
 
+  useEffect(() => {
+    if (!geometry && drawnLayerRef.current) {
+      try {
+        drawnLayerRef.current.remove();
+      } catch {
+        // ignore
+      }
+      drawnLayerRef.current = null;
+    }
+  }, [geometry]);
+
+  useEffect(() => {
+    if (
+      drawnLayerRef.current &&
+      typeof (drawnLayerRef.current as unknown as { setStyle?: (style: object) => void })
+        .setStyle === "function"
+    ) {
+      (
+        drawnLayerRef.current as unknown as { setStyle: (style: object) => void }
+      ).setStyle({
+        color: "#16a34a",
+        weight: 3,
+        fillColor: "transparent",
+        fillOpacity: imageUrl ? 0 : 0.2,
+      });
+    }
+  }, [imageUrl]);
+
   return (
     <>
       <div className={styles.mapToolbar}>
@@ -288,14 +370,14 @@ export function StressMapInner({
             drawnLayerRef={drawnLayerRef}
           />
 
-          {positions.length >= 3 && !imageUrl ? (
+          {positions.length >= 3 ? (
             <Polygon
               positions={positions}
               pathOptions={{
-                color: "#22c55e",
+                color: "#16a34a",
                 weight: 3,
-                fillColor: "#15803d",
-                fillOpacity: 0.2,
+                fillColor: imageUrl ? "transparent" : "#22c55e",
+                fillOpacity: imageUrl ? 0 : 0.25,
               }}
             />
           ) : null}

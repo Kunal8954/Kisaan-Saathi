@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Sparkles, Trash2 } from "lucide-react";
 
@@ -54,19 +55,14 @@ export function StressMap() {
   const [selectedFieldId, setSelectedFieldId] = useState<string>("");
   const [activeGeometry, setActiveGeometry] = useState<FieldGeometry | null>(null);
   const [measurement, setMeasurement] = useState<PolygonMeasurement | null>(null);
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState(() => daysAgo(30));
+  const [dateTo, setDateTo] = useState(() => daysAgo(0));
   const [layer, setLayer] = useState<HeatmapLayer>("ndvi");
   const [result, setResult] = useState<HeatmapResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const activeLayer = LAYERS.find((item) => item.id === layer) ?? LAYERS[0];
-
-  useEffect(() => {
-    setDateFrom(daysAgo(30));
-    setDateTo(daysAgo(0));
-  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -84,7 +80,7 @@ export function StressMap() {
       to: string,
       selectedLayer: HeatmapLayer
     ) => {
-      if (!geometry || !from || !to) {
+      if (!geometry || !geometry.coordinates?.[0]?.length) {
         return;
       }
       setLoading(true);
@@ -111,9 +107,9 @@ export function StressMap() {
       setMeasurement(m);
       setError(null);
 
-      if (m.valid && dateFrom && dateTo) {
-        void loadHeatmapData(geometry, dateFrom, dateTo, layer);
-      }
+      const from = dateFrom || daysAgo(30);
+      const to = dateTo || daysAgo(0);
+      void loadHeatmapData(geometry, from, to, layer);
     },
     [dateFrom, dateTo, layer, loadHeatmapData]
   );
@@ -136,9 +132,9 @@ export function StressMap() {
       setActiveGeometry(field.geometry);
       const m = measurePolygon(field.geometry);
       setMeasurement(m);
-      if (dateFrom && dateTo) {
-        void loadHeatmapData(field.geometry, dateFrom, dateTo, layer);
-      }
+      const from = dateFrom || daysAgo(30);
+      const to = dateTo || daysAgo(0);
+      void loadHeatmapData(field.geometry, from, to, layer);
     }
   }
 
@@ -147,17 +143,21 @@ export function StressMap() {
       return;
     }
     setLayer(newLayer);
-    if (activeGeometry && dateFrom && dateTo) {
-      void loadHeatmapData(activeGeometry, dateFrom, dateTo, newLayer);
+    if (activeGeometry) {
+      const from = dateFrom || daysAgo(30);
+      const to = dateTo || daysAgo(0);
+      void loadHeatmapData(activeGeometry, from, to, newLayer);
     }
   }
 
   function handleManualSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!activeGeometry || !dateFrom || !dateTo) {
+    if (!activeGeometry) {
       return;
     }
-    void loadHeatmapData(activeGeometry, dateFrom, dateTo, layer);
+    const from = dateFrom || daysAgo(30);
+    const to = dateTo || daysAgo(0);
+    void loadHeatmapData(activeGeometry, from, to, layer);
   }
 
   const selectedPoint = activeGeometry ? centroidOfGeometry(activeGeometry) : null;
@@ -309,6 +309,26 @@ export function StressMap() {
         )}
       </form>
 
+      {loading ? (
+        <div
+          style={{
+            margin: "8px 0 12px",
+            padding: "8px 14px",
+            background: "#ecfdf5",
+            border: "1px solid #a7f3d0",
+            borderRadius: "10px",
+            color: "#065f46",
+            fontSize: "13px",
+            fontWeight: 600,
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          🛰️ {t.stress.loading}...
+        </div>
+      ) : null}
+
       {error ? (
         <p className={styles.stressStatus} role="alert">
           {error}
@@ -386,6 +406,63 @@ export function StressMap() {
               </dd>
             </div>
           </dl>
+
+          <div
+            style={{
+              marginTop: "1rem",
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "10px",
+              flexWrap: "wrap",
+            }}
+          >
+            <Link
+              href="/places"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                background: "#047857",
+                color: "#ffffff",
+                padding: "8px 16px",
+                borderRadius: "8px",
+                fontWeight: 700,
+                fontSize: "0.88rem",
+                textDecoration: "none",
+                boxShadow: "0 2px 4px rgba(4, 120, 87, 0.25)",
+              }}
+            >
+              <span>🏪</span>
+              <span>
+                {t.brand === "किसान साथी"
+                  ? "नजदीकी मंडी व खाद केंद्र"
+                  : "Nearby Mandis & Centers"}
+              </span>
+            </Link>
+            <Link
+              href="/reports"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                background: "#1e3a8a",
+                color: "#ffffff",
+                padding: "8px 16px",
+                borderRadius: "8px",
+                fontWeight: 700,
+                fontSize: "0.88rem",
+                textDecoration: "none",
+                boxShadow: "0 2px 4px rgba(30, 58, 138, 0.25)",
+              }}
+            >
+              <span>📄</span>
+              <span>
+                {t.brand === "किसान साथी"
+                  ? "इस खेत का बीमा दावा PDF बनाएं"
+                  : "Generate Insurance Claim PDF"}
+              </span>
+            </Link>
+          </div>
         </section>
       ) : null}
 

@@ -92,10 +92,7 @@ async def get_field_weather(
             "temperature_2m,relative_humidity_2m,precipitation,"
             "wind_speed_10m,wind_gusts_10m,wind_direction_10m"
         ),
-        "daily": (
-            "precipitation_sum,temperature_2m_max,temperature_2m_min,"
-            "wind_speed_10m_max"
-        ),
+        "daily": ("precipitation_sum,temperature_2m_max,temperature_2m_min,wind_speed_10m_max"),
         "timezone": "auto",
         "forecast_days": 3,
         "temperature_unit": "celsius",

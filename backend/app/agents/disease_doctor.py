@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from uuid import UUID, uuid4
 
 from app.agents.state import AgentState
@@ -23,10 +23,7 @@ from app.models.diagnosis import (
 from app.models.farmer import ExperienceMode, Language
 
 CATALOG_PATH = (
-    Path(__file__).resolve().parents[3]
-    / "data"
-    / "crop_knowledge"
-    / "agronomy_catalog.json"
+    Path(__file__).resolve().parents[3] / "data" / "crop_knowledge" / "agronomy_catalog.json"
 )
 
 KVK_DISCLAIMER_HI = (
@@ -45,7 +42,10 @@ def _load_catalog() -> list[dict[str, Any]]:
     if not CATALOG_PATH.exists():
         return []
     with open(CATALOG_PATH, encoding="utf-8") as f:
-        return json.load(f)
+        data: Any = json.load(f)
+        if isinstance(data, list):
+            return cast(list[dict[str, Any]], data)
+        return []
 
 
 def _match_catalog_entry(

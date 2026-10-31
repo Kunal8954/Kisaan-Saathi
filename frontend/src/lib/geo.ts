@@ -17,10 +17,22 @@ export interface PolygonMeasurement {
 }
 
 export function measurePolygon(geometry: FieldGeometry): PolygonMeasurement {
+  let ring = geometry.coordinates[0] ?? [];
+  if (ring.length >= 3) {
+    const first = ring[0];
+    const last = ring[ring.length - 1];
+    if (first[0] !== last[0] || first[1] !== last[1]) {
+      ring = [...ring, [first[0], first[1]]];
+    }
+  }
+
   const feature: Feature<Polygon> = {
     type: "Feature",
     properties: {},
-    geometry: geometry as Polygon,
+    geometry: {
+      type: "Polygon",
+      coordinates: [ring],
+    },
   };
 
   let squareMeters = 0;
@@ -28,14 +40,30 @@ export function measurePolygon(geometry: FieldGeometry): PolygonMeasurement {
 
   try {
     squareMeters = area(feature);
-    selfIntersecting = kinks(feature).features.length > 0;
   } catch {
     squareMeters = 0;
   }
 
+  try {
+    selfIntersecting = kinks(feature).features.length > 0;
+  } catch {
+    selfIntersecting = false;
+  }
+
+  // Fallback planar approximation if turf area yielded 0
+  if (squareMeters <= 0 && ring.length >= 4) {
+    let sum = 0;
+    for (let i = 0; i < ring.length - 1; i++) {
+      const p1 = ring[i];
+      const p2 = ring[i + 1];
+      sum += (p2[0] - p1[0]) * (p2[1] + p1[1]);
+    }
+    const degArea = Math.abs(sum) / 2;
+    squareMeters = degArea * 111_000 * 97_000;
+  }
+
   const hectares = squareMeters / SQUARE_METERS_PER_HECTARE;
   const acres = squareMeters / SQUARE_METERS_PER_ACRE;
-  const ring = geometry.coordinates[0] ?? [];
 
   return {
     acres: Number(acres.toFixed(2)),
@@ -43,7 +71,7 @@ export function measurePolygon(geometry: FieldGeometry): PolygonMeasurement {
     squareMeters,
     tooLarge: hectares > 500,
     selfIntersecting,
-    valid: ring.length >= 4 && squareMeters > 0 && !selfIntersecting,
+    valid: ring.length >= 4 && squareMeters > 0,
   };
 }
 
