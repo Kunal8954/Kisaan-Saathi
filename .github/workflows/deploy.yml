@@ -1,0 +1,77 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_REGION: ${{ vars.GCP_REGION || 'asia-south1' }}
+  ARTIFACT_REPOSITORY: ${{ vars.ARTIFACT_REPOSITORY || 'kisan-saathi' }}
+
+jobs:
+  deploy:
+    name: Build and deploy to Cloud Run
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "${GCP_REGION}-docker.pkg.dev" --quiet
+
+      - name: Build backend image
+        run: |
+          docker build \
+            -t "${GCP_REGION}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${ARTIFACT_REPOSITORY}/backend:${{ github.sha }}" \
+            ./backend
+
+      - name: Build frontend image
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_API_BASE_URL="${{ vars.PUBLIC_API_BASE_URL }}" \
+            -t "${GCP_REGION}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${ARTIFACT_REPOSITORY}/frontend:${{ github.sha }}" \
+            ./frontend
+
+      - name: Push images
+        run: |
+          docker push "${GCP_REGION}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${ARTIFACT_REPOSITORY}/backend:${{ github.sha }}"
+          docker push "${GCP_REGION}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${ARTIFACT_REPOSITORY}/frontend:${{ github.sha }}"
+
+      - name: Deploy backend
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: kisan-saathi-api
+          region: ${{ env.GCP_REGION }}
+          image: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/backend:${{ github.sha }}
+          env_vars: |
+            APP_ENV=production
+            GOOGLE_CLOUD_PROJECT=${{ vars.GCP_PROJECT_ID }}
+            GOOGLE_CLOUD_LOCATION=${{ env.GCP_REGION }}
+            API_CORS_ORIGINS=${{ vars.PUBLIC_WEB_ORIGIN }}
+            GCS_BUCKET=${{ vars.GCS_BUCKET }}
+          secrets: |
+            MONGODB_URI=mongodb-uri:latest
+
+      - name: Deploy frontend
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: kisan-saathi-web
+          region: ${{ env.GCP_REGION }}
+          image: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/frontend:${{ github.sha }}
+          env_vars: |
+            NEXT_PUBLIC_API_BASE_URL=${{ vars.PUBLIC_API_BASE_URL }}

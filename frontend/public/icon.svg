@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Kisan Saathi">
+  <rect width="512" height="512" rx="96" fill="#1f6f43"/>
+  <path d="M256 408V190" stroke="#f7f4ec" stroke-width="28" stroke-linecap="round"/>
+  <path d="M256 248c-52 0-92-36-92-84 50 0 92 30 92 84Z" fill="#f2c14e"/>
+  <path d="M256 304c52 0 92-36 92-84-50 0-92 30-92 84Z" fill="#f2c14e"/>
+  <path d="M256 356c-52 0-92-36-92-84 50 0 92 30 92 84Z" fill="#f2c14e"/>
+  <circle cx="256" cy="126" r="26" fill="#f7f4ec"/>
+</svg>

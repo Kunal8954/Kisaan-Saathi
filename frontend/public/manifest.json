@@ -1,0 +1,20 @@
+{
+  "name": "Kisan Saathi",
+  "short_name": "Kisan Saathi",
+  "description": "Hindi-first AI farming advisor for Indian farmers.",
+  "lang": "hi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f4ec",
+  "theme_color": "#1f6f43",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
