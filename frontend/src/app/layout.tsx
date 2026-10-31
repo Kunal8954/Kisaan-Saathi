@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
+import { AppChrome } from "@/components/AppChrome";
+import { AuthProvider } from "@/components/AuthProvider";
 import { NavBar } from "@/components/NavBar";
 import { getDictionary } from "@/lib/i18n";
+import { LanguageProvider } from "@/lib/locale";
 
 import "./globals.css";
 
@@ -26,16 +29,20 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1f6f43",
+  themeColor: "#3b63e0",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="hi">
       <body>
-        <NavBar />
-        <main className="page">{children}</main>
-        <footer className="site-footer">{dictionary.footer}</footer>
+        <LanguageProvider>
+          <AuthProvider>
+            <AppChrome header={<NavBar />} footer={dictionary.footer}>
+              {children}
+            </AppChrome>
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );
