@@ -1,13 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { Sparkles, Trash2 } from "lucide-react";
 
 import { useAuth } from "@/components/AuthProvider";
 import { FieldAdvisory } from "@/components/FieldAdvisory";
-import { getFields, type Field } from "@/lib/fieldsStore";
-import { centroidOfGeometry } from "@/lib/geo";
+import { getFields, type Field, type FieldGeometry } from "@/lib/fieldsStore";
+import { centroidOfGeometry, measurePolygon, type PolygonMeasurement } from "@/lib/geo";
 import {
   fetchHeatmap,
   type HeatmapLayer,
@@ -49,9 +49,11 @@ function daysAgo(days: number): string {
 
 export function StressMap() {
   const { t } = useI18n();
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [fields, setFields] = useState<Field[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedFieldId, setSelectedFieldId] = useState<string>("");
+  const [activeGeometry, setActiveGeometry] = useState<FieldGeometry | null>(null);
+  const [measurement, setMeasurement] = useState<PolygonMeasurement | null>(null);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [layer, setLayer] = useState<HeatmapLayer>("ndvi");
@@ -59,11 +61,6 @@ export function StressMap() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedField =
-    fields.find((field) => field.id === selectedId) ?? null;
-  const selectedPoint = selectedField
-    ? centroidOfGeometry(selectedField.geometry)
-    : null;
   const activeLayer = LAYERS.find((item) => item.id === layer) ?? LAYERS[0];
 
   useEffect(() => {
@@ -74,22 +71,96 @@ export function StressMap() {
   useEffect(() => {
     if (!user) {
       setFields([]);
-      setSelectedId(null);
       return;
     }
     const stored = getFields(user.uid);
     setFields(stored);
-    setSelectedId((current) =>
-      current && stored.some((field) => field.id === current)
-        ? current
-        : stored[0]?.id ?? null
-    );
   }, [user]);
 
-  function resetResult() {
+  const loadHeatmapData = useCallback(
+    async (
+      geometry: FieldGeometry,
+      from: string,
+      to: string,
+      selectedLayer: HeatmapLayer
+    ) => {
+      if (!geometry || !from || !to) {
+        return;
+      }
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await fetchHeatmap(geometry, from, to, selectedLayer);
+        setResult(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : t.stress.error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [t.stress.error]
+  );
+
+  // Directly when farmer draws a polygon on the map
+  const handleGeometryChange = useCallback(
+    (geometry: FieldGeometry) => {
+      setActiveGeometry(geometry);
+      setSelectedFieldId("");
+      const m = measurePolygon(geometry);
+      setMeasurement(m);
+      setError(null);
+
+      if (m.valid && dateFrom && dateTo) {
+        void loadHeatmapData(geometry, dateFrom, dateTo, layer);
+      }
+    },
+    [dateFrom, dateTo, layer, loadHeatmapData]
+  );
+
+  const handleGeometryClear = useCallback(() => {
+    setActiveGeometry(null);
+    setMeasurement(null);
     setResult(null);
     setError(null);
+  }, []);
+
+  function handleSelectSavedField(fieldId: string) {
+    setSelectedFieldId(fieldId);
+    if (!fieldId) {
+      handleGeometryClear();
+      return;
+    }
+    const field = fields.find((f) => f.id === fieldId);
+    if (field) {
+      setActiveGeometry(field.geometry);
+      const m = measurePolygon(field.geometry);
+      setMeasurement(m);
+      if (dateFrom && dateTo) {
+        void loadHeatmapData(field.geometry, dateFrom, dateTo, layer);
+      }
+    }
   }
+
+  function handleLayerChange(newLayer: HeatmapLayer) {
+    if (newLayer === layer) {
+      return;
+    }
+    setLayer(newLayer);
+    if (activeGeometry && dateFrom && dateTo) {
+      void loadHeatmapData(activeGeometry, dateFrom, dateTo, newLayer);
+    }
+  }
+
+  function handleManualSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!activeGeometry || !dateFrom || !dateTo) {
+      return;
+    }
+    void loadHeatmapData(activeGeometry, dateFrom, dateTo, layer);
+  }
+
+  const selectedPoint = activeGeometry ? centroidOfGeometry(activeGeometry) : null;
 
   function formatValue(
     value: number | null | undefined,
@@ -109,70 +180,9 @@ export function StressMap() {
     return `${value > 0 ? "+" : ""}${value.toFixed(3)}`;
   }
 
-  const layerMissing = result
-    ? layer === "ndvi" || layer === "ndvi_anomaly"
-      ? result.metrics.ndvi === null
-      : layer === "ndmi"
-        ? result.metrics.ndmi === null
-        : result.metrics.land_surface_temperature_c === null
-    : false;
-
-  async function handleLoad(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!selectedField || !dateFrom || !dateTo) {
-      return;
-    }
-
-    setLoading(true);
-    resetResult();
-
-    try {
-      const data = await fetchHeatmap(
-        selectedField.geometry,
-        dateFrom,
-        dateTo,
-        layer
-      );
-      setResult(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t.stress.error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (authLoading) {
-    return <div className={styles.mapLoading}>{t.common.loading}</div>;
-  }
-
-  if (!user) {
-    return (
-      <div className={styles.mapLoading}>
-        <div>
-          <p>{t.stress.loginRequired}</p>
-          <Link className={styles.buttonSecondary} href="/login">
-            {t.stress.goToLogin}
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (fields.length === 0) {
-    return (
-      <div className={styles.mapLoading}>
-        <div>
-          <p>{t.stress.noFields}</p>
-          <Link className={styles.buttonSecondary} href="/dashboard">
-            {t.stress.goToDashboard}
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div>
+      {/* Layer Tabs */}
       <div className={styles.layerTabs} role="tablist">
         {LAYERS.map((item) => (
           <button
@@ -183,44 +193,82 @@ export function StressMap() {
             className={`${styles.layerTab} ${
               layer === item.id ? styles.layerTabActive : ""
             }`}
-            onClick={() => {
-              if (item.id !== layer) {
-                setLayer(item.id);
-                resetResult();
-              }
-            }}
+            onClick={() => handleLayerChange(item.id)}
           >
             {t.stress.layers[item.labelKey]}
           </button>
         ))}
       </div>
+
       <p className={styles.stressSummary}>
         {t.stress.layerHint[activeLayer.labelKey]}
       </p>
 
-      <form className={styles.form} onSubmit={handleLoad}>
-        <div className={styles.fieldGroup}>
-          <label className={styles.label} htmlFor="stress-field">
-            {t.stress.field}
-          </label>
-          <select
-            id="stress-field"
-            className={styles.select}
-            value={selectedId ?? ""}
-            onChange={(event) => {
-              setSelectedId(event.target.value);
-              resetResult();
-            }}
-          >
-            {fields.map((field) => (
-              <option key={field.id} value={field.id}>
-                {field.name}
-              </option>
-            ))}
-          </select>
+      {/* Drawing Guide & Field Selector Toolbar */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "12px",
+          background: "#f0fdf4",
+          border: "1.5px solid #bbf7d0",
+          borderRadius: "14px",
+          padding: "12px 16px",
+          margin: "12px 0",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <Sparkles size={18} color="#15803d" />
+          <span style={{ fontSize: "14px", fontWeight: 700, color: "#166534" }}>
+            {activeGeometry && measurement?.valid
+              ? `🌾 ${t.stress.areaLabel}: ${measurement.acres} ${t.stress.areaAcres} (${measurement.hectares} ${t.stress.areaHectares})`
+              : t.stress.drawPrompt}
+          </span>
         </div>
 
-        <div className={styles.stressDates}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {fields.length > 0 && (
+            <select
+              className={styles.select}
+              style={{ padding: "6px 12px", fontSize: "13px", height: "36px" }}
+              value={selectedFieldId}
+              onChange={(e) => handleSelectSavedField(e.target.value)}
+            >
+              <option value="">-- {t.stress.orSaved} --</option>
+              {fields.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.name} ({f.area.acres} {t.stress.areaAcres})
+                </option>
+              ))}
+            </select>
+          )}
+
+          {activeGeometry && (
+            <button
+              type="button"
+              className={styles.buttonSecondary}
+              style={{
+                height: "36px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "13px",
+              }}
+              onClick={handleGeometryClear}
+              title={t.stress.clearField}
+            >
+              <Trash2 size={15} color="#b91c1c" />
+              {t.stress.clearField}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Date Controls Form */}
+      <form className={styles.form} onSubmit={handleManualSubmit}>
+        <div className={styles.stressDates} style={{ width: "100%" }}>
           <div className={styles.fieldGroup}>
             <label className={styles.label} htmlFor="stress-from">
               {t.stress.dateFrom}
@@ -231,10 +279,7 @@ export function StressMap() {
               type="date"
               value={dateFrom}
               max={dateTo || undefined}
-              onChange={(event) => {
-                setDateFrom(event.target.value);
-                resetResult();
-              }}
+              onChange={(event) => setDateFrom(event.target.value)}
             />
           </div>
           <div className={styles.fieldGroup}>
@@ -248,21 +293,20 @@ export function StressMap() {
               value={dateTo}
               min={dateFrom || undefined}
               max={toInputDate(new Date())}
-              onChange={(event) => {
-                setDateTo(event.target.value);
-                resetResult();
-              }}
+              onChange={(event) => setDateTo(event.target.value)}
             />
           </div>
         </div>
 
-        <button
-          type="submit"
-          className={`${styles.buttonPrimary} ${styles.submitButton}`}
-          disabled={loading || !selectedField || !dateFrom || !dateTo}
-        >
-          {loading ? t.stress.loading : t.stress.load}
-        </button>
+        {activeGeometry && (
+          <button
+            type="submit"
+            className={`${styles.buttonPrimary} ${styles.submitButton}`}
+            disabled={loading || !activeGeometry || !dateFrom || !dateTo}
+          >
+            {loading ? t.stress.loading : t.stress.load}
+          </button>
+        )}
       </form>
 
       {error ? (
@@ -271,14 +315,16 @@ export function StressMap() {
         </p>
       ) : null}
 
-      {selectedField ? (
-        <StressMapInner
-          geometry={selectedField.geometry}
-          imageUrl={result?.imageUrl ?? null}
-          bounds={result?.bounds ?? null}
-        />
-      ) : null}
+      {/* Interactive Map with Drawing Tools */}
+      <StressMapInner
+        geometry={activeGeometry}
+        imageUrl={result?.imageUrl ?? null}
+        bounds={result?.bounds ?? null}
+        onGeometryChange={handleGeometryChange}
+        onGeometryClear={handleGeometryClear}
+      />
 
+      {/* Heatmap Legend */}
       <div className="map-legend">
         <span>
           {layer === "lst" ? t.stress.legendTempLow : t.stress.legendLow}
@@ -293,31 +339,22 @@ export function StressMap() {
         </span>
       </div>
 
-      {layerMissing ? (
-        <p className={styles.stressSummary}>{t.stress.empty}</p>
-      ) : null}
-
-      {selectedField && selectedPoint ? (
-        <FieldAdvisory
-          metrics={result?.metrics ?? null}
-          metricsLoading={loading}
-          metricsError={result ? null : error}
-          latitude={selectedPoint.latitude}
-          longitude={selectedPoint.longitude}
-        />
-      ) : null}
-
+      {/* Live Satellite Metrics */}
       {result ? (
         <section className={styles.stressMetrics}>
           <h2 className={styles.stressMetricsTitle}>{t.stress.metricsTitle}</h2>
           <dl className={styles.stressMetricsGrid}>
             <div>
               <dt>{t.stress.metricNdvi}</dt>
-              <dd>{formatValue(result.metrics.ndvi)}</dd>
+              <dd style={{ color: "#15803d" }}>
+                {formatValue(result.metrics.ndvi)}
+              </dd>
             </div>
             <div>
               <dt>{t.stress.metricAnomaly}</dt>
-              <dd>{formatAnomaly(result.metrics.ndvi_anomaly)}</dd>
+              <dd style={{ color: result.metrics.ndvi_anomaly && result.metrics.ndvi_anomaly >= 0 ? "#15803d" : "#b91c1c" }}>
+                {formatAnomaly(result.metrics.ndvi_anomaly)}
+              </dd>
               {result.metrics.ndvi_baseline !== null ? (
                 <small>
                   {t.stress.baseline}: {formatValue(result.metrics.ndvi_baseline)}
@@ -326,11 +363,13 @@ export function StressMap() {
             </div>
             <div>
               <dt>{t.stress.metricNdmi}</dt>
-              <dd>{formatValue(result.metrics.ndmi)}</dd>
+              <dd style={{ color: "#0284c7" }}>
+                {formatValue(result.metrics.ndmi)}
+              </dd>
             </div>
             <div>
               <dt>{t.stress.metricLst}</dt>
-              <dd>
+              <dd style={{ color: "#b45309" }}>
                 {formatValue(
                   result.metrics.land_surface_temperature_c,
                   1,
@@ -340,13 +379,25 @@ export function StressMap() {
             </div>
             <div className={styles.stressMetricWide}>
               <dt>{t.stress.metricSoil}</dt>
-              <dd className={styles.stressUnavailable}>
-                {t.stress.unavailable}
+              <dd style={{ color: "#166534" }}>
+                {result.metrics.soil_moisture !== null
+                  ? `${result.metrics.soil_moisture.toFixed(1)}%`
+                  : t.stress.unavailable}
               </dd>
-              <small>{t.stress.soilUnavailable}</small>
             </div>
           </dl>
         </section>
+      ) : null}
+
+      {/* Field Environmental Advisory based on live satellite readings */}
+      {activeGeometry && selectedPoint ? (
+        <FieldAdvisory
+          metrics={result?.metrics ?? null}
+          metricsLoading={loading}
+          metricsError={result ? null : error}
+          latitude={selectedPoint.latitude}
+          longitude={selectedPoint.longitude}
+        />
       ) : null}
 
       <details className={styles.stressExplain}>

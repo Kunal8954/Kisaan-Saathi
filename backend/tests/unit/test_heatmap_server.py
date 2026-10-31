@@ -118,3 +118,30 @@ def test_main_app_mounts_weather_route() -> None:
 
     assert "/api/weather" in app.openapi()["paths"]
 
+
+def test_heatmap_returns_image_and_proper_metrics() -> None:
+    client = TestClient(h.app)
+    response = client.post(
+        "/heatmap",
+        json={
+            "polygon": SQUARE,
+            "date_from": "2026-02-01",
+            "date_to": "2026-02-28",
+            "layer": "ndvi",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "image_base64" in data and len(data["image_base64"]) > 50
+    assert "bounds" in data
+
+    metrics = data["metrics"]
+    assert isinstance(metrics["ndvi"], float) and 0.0 <= metrics["ndvi"] <= 1.0
+    assert isinstance(metrics["ndvi_anomaly"], float)
+    assert isinstance(metrics["ndvi_baseline"], float)
+    assert isinstance(metrics["ndmi"], float)
+    assert isinstance(metrics["land_surface_temperature_c"], float)
+    assert isinstance(metrics["soil_moisture"], float)
+    assert len(metrics["baseline_years"]) == 3
+

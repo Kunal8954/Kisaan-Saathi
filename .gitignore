@@ -44,6 +44,7 @@ data/**/*.jpeg
 data/**/*.png
 data/**/*.json
 !data/**/.gitkeep
+!data/crop_knowledge/*.json
 
 # Generated reports and uploads
 uploads/

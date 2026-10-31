@@ -1,0 +1,287 @@
+[
+  {
+    "id": "ICAR-WHEAT-YR-2024",
+    "crop": "wheat",
+    "crop_hi": "गेहूं",
+    "symptoms": [
+      "yellow stripes on leaves",
+      "powdery yellow pustules",
+      "chlorotic streaks",
+      "stunted growth",
+      "pila ratua",
+      "yellow rust"
+    ],
+    "likely_cause": "Yellow Rust (Puccinia striiformis) / पीला रतुआ",
+    "likely_cause_hi": "पीला रतुआ (येलो रस्ट / फफूंद रोग)",
+    "cause_category": "disease",
+    "confidence": 0.88,
+    "chemical_remedy": {
+      "title": "Propiconazole 25% EC (टिल्ट)",
+      "title_hi": "प्रोपिकोनाजोल 25% EC (टिल्ट)",
+      "instructions": "Mix 200 ml of Propiconazole 25% EC in 200 litres of water per acre. Spray evenly on the foliage during early morning or late afternoon when symptoms first appear.",
+      "instructions_hi": "200 मिली प्रोपिकोनाजोल 25% EC को 200 लीटर पानी में प्रति एकड़ मिलाकर पत्तियों पर अच्छी तरह छिड़काव करें। पहला लक्षण दिखते ही सुबह या शाम छिड़कें।",
+      "safety_notes": "Use protective gloves and face mask. Avoid spraying during high winds or rain. Do not harvest within 30 days of application.",
+      "safety_notes_hi": "दवा छिड़कते समय दस्ताने और मास्क पहनें। तेज हवा या बारिश के समय छिड़काव न करें।"
+    },
+    "organic_remedy": {
+      "title": "Sour Buttermilk & Cow Urine Spray (खट्टी छाछ और गौमूत्र)",
+      "title_hi": "खट्टी छाछ और गौमूत्र का काढ़ा",
+      "instructions": "Mix 5 litres of sour buttermilk (fermented for 5-7 days in an earthen or copper pot) with 5 litres of fresh desi cow urine in 100 litres of water. Strain through muslin cloth and spray every 10 days.",
+      "instructions_hi": "5 लीटर खट्टी छाछ (तांबे के बर्तन में 5-7 दिन रखी हुई) और 5 लीटर देसी गाय का गौमूत्र 100 लीटर पानी में मिलाएं। कपड़े से छानकर हर 10 दिन में फसल पर छिड़कें।",
+      "safety_notes": "Always strain thoroughly to avoid nozzle blockage. Best applied in clear sunny weather.",
+      "safety_notes_hi": "छिड़काव से पहले कपड़े से अच्छी तरह छान लें ताकि नोजल बंद न हो।"
+    },
+    "sources": ["ICAR-IIWBR Karnal Advisory #WHEAT-YR-2024", "PAU Agronomy Wheat Guide 2023-24"],
+    "disclaimer_hi": "यह प्रारंभिक सलाह है। कोई भी रासायनिक उपचार करने से पहले अपने नजदीकी कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से संपर्क करें।",
+    "disclaimer_en": "This is preliminary guidance. Consult your local Krishi Vigyan Kendra (KVK) or agricultural officer before applying any treatment."
+  },
+  {
+    "id": "ICAR-WHEAT-N-DEF-2024",
+    "crop": "wheat",
+    "crop_hi": "गेहूं",
+    "symptoms": [
+      "pale green leaves",
+      "yellowing of older lower leaves",
+      "stunted tillering",
+      "v-shaped yellowing",
+      "nitrogen deficiency",
+      "pile patte"
+    ],
+    "likely_cause": "Nitrogen Deficiency / नाइट्रोजन की कमी",
+    "likely_cause_hi": "नाइट्रोजन की कमी (पोषक तत्व अभाव)",
+    "cause_category": "deficiency",
+    "confidence": 0.85,
+    "chemical_remedy": {
+      "title": "Foliar Spray of 2% Urea / यूरिया का पर्णीय छिड़काव",
+      "title_hi": "2% यूरिया घोल का पर्णीय छिड़काव",
+      "instructions": "Dissolve 4 kg Neem-coated Urea in 200 litres of water per acre. Spray uniformly across the field during the tillering or vegetative stage.",
+      "instructions_hi": "प्रति एकड़ 4 किलो नीम-लेपित यूरिया को 200 लीटर पानी में घोलें (2% घोल)। कल्ले फूटते समय पत्तियों पर एक समान छिड़काव करें।",
+      "safety_notes": "Do not exceed 2% concentration as it may scorch tender leaves. Ensure sufficient soil moisture before spraying.",
+      "safety_notes_hi": "2% से अधिक यूरिया न डालें नहीं तो पत्तियां जल सकती हैं। खेत में पर्याप्त नमी होना आवश्यक है।"
+    },
+    "organic_remedy": {
+      "title": "Jeevamrit & Vermicompost Application (जीवामृत और केंचुआ खाद)",
+      "title_hi": "जीवामृत व वर्मीकंपोस्ट (केंचुआ खाद)",
+      "instructions": "Apply 200 litres of freshly prepared Jeevamrit per acre along with irrigation water. Alternatively, top-dress 100 kg of well-rotted vermicompost per acre near root zones.",
+      "instructions_hi": "प्रति एकड़ 200 लीटर तैयार जीवामृत को सिंचाई के पानी के साथ चलाएं। अथवा 1 क्विंटल वर्मीकंपोस्ट जड़ों के पास बुरकें।",
+      "safety_notes": "Use Jeevamrit within 7 days of fermentation. Keep in shade during storage.",
+      "safety_notes_hi": "जीवामृत बनने के 7 दिनों के भीतर उपयोग करें और इसे धूप से बचाकर छाया में रखें।"
+    },
+    "sources": ["ICAR-IARI Soil & Plant Nutrition Bulletin 2024", "National Centre of Organic Farming (NCOF)"],
+    "disclaimer_hi": "यह प्रारंभिक सलाह है। कोई भी रासायनिक उपचार करने से पहले अपने नजदीकी कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से संपर्क करें।",
+    "disclaimer_en": "This is preliminary guidance. Consult your local Krishi Vigyan Kendra (KVK) or agricultural officer before applying any treatment."
+  },
+  {
+    "id": "ICAR-RICE-BLB-2024",
+    "crop": "rice",
+    "crop_hi": "धान",
+    "symptoms": [
+      "water soaked lesions",
+      "wavy yellow margins on leaf blade",
+      "leaf blight",
+      "bacterial leaf blight",
+      "jhulsa rog"
+    ],
+    "likely_cause": "Bacterial Leaf Blight (Xanthomonas oryzae) / जीवाणु झुलसा",
+    "likely_cause_hi": "जीवाणु झुलसा (बैक्टीरियल लीफ ब्लाइट)",
+    "cause_category": "disease",
+    "confidence": 0.86,
+    "chemical_remedy": {
+      "title": "Streptocycline + Copper Oxychloride",
+      "title_hi": "स्ट्रेप्टोसाइक्लिन + कॉपर ऑक्सीक्लोराइड",
+      "instructions": "Mix 15g Streptocycline and 500g Copper Oxychloride 50% WP in 200 litres of water per acre. Spray on leaves at 10-12 day intervals.",
+      "instructions_hi": "15 ग्राम स्ट्रेप्टोसाइक्लिन और 500 ग्राम कॉपर ऑक्सीक्लोराइड 50% WP को 200 लीटर पानी में मिलाकर प्रति एकड़ छिड़कें। 10-12 दिन बाद आवश्यकतानुसार दोहराएं।",
+      "safety_notes": "Stop nitrogen application temporarily when blight is detected. Avoid stagnant standing water in the field.",
+      "safety_notes_hi": "रोग दिखने पर खेत में यूरिया देना तुरंत बंद करें और खेत का पानी निकाल दें।"
+    },
+    "organic_remedy": {
+      "title": "Fresh Cow Dung Extract & Hing Spray (ताजा गोबर घोल व हींग)",
+      "title_hi": "ताजा गोबर अर्क और हींग का छिड़काव",
+      "instructions": "Stir 5 kg fresh indigenous cow dung in 20 litres of water, filter through double-layer muslin cloth. Mix into 100 litres of water with 50g dissolved asafoetida (hing) and spray.",
+      "instructions_hi": "5 किलो ताजा देसी गाय का गोबर 20 लीटर पानी में घोलें और कपड़े से छान लें। इसमें 50 ग्राम घुली हींग मिलाकर कुल 100 लीटर पानी बनाकर छिड़काव करें।",
+      "safety_notes": "Use only fresh cow dung from healthy indigenous cows. Spray during non-rainy periods.",
+      "safety_notes_hi": "केवल स्वस्थ देसी गाय के ताजे गोबर का ही प्रयोग करें।"
+    },
+    "sources": ["ICAR-NRRI Cuttack Rice Pathology #NRRI-BLB-2024", "IRRI Rice Knowledge Bank"],
+    "disclaimer_hi": "यह प्रारंभिक सलाह है। कोई भी रासायनिक उपचार करने से पहले अपने नजदीकी कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से संपर्क करें।",
+    "disclaimer_en": "This is preliminary guidance. Consult your local Krishi Vigyan Kendra (KVK) or agricultural officer before applying any treatment."
+  },
+  {
+    "id": "ICAR-RICE-BPH-2024",
+    "crop": "rice",
+    "crop_hi": "धान",
+    "symptoms": [
+      "circular brown patches in field",
+      "hopper burn",
+      "wilting and drying",
+      "brown insects at stem base",
+      "bph",
+      "mahu"
+    ],
+    "likely_cause": "Brown Plant Hopper (Nilaparvata lugens) / भूरा माहू (हॉपर बर्न)",
+    "likely_cause_hi": "भूरा माहू / तेला (ब्राउन प्लांट हॉपर)",
+    "cause_category": "pest",
+    "confidence": 0.90,
+    "chemical_remedy": {
+      "title": "Pymetrozine 50% WDG (चेस)",
+      "title_hi": "पाइमेट्रोजिन 50% WDG (चेस)",
+      "instructions": "Dissolve 120g of Pymetrozine 50% WDG in 200 litres of water per acre. Direct the nozzle towards the base of the rice plants where hoppers congregate.",
+      "instructions_hi": "120 ग्राम पाइमेट्रोजिन 50% WDG को 200 लीटर पानी में घोलकर प्रति एकड़ छिड़कें। नोजल को पौधों के तने (निचले हिस्से) की ओर रखें।",
+      "safety_notes": "Ensure spray reaches the base of plants. Drain excess water from fields for 2-3 days before application.",
+      "safety_notes_hi": "स्प्रे पौधे के आधार तक पहुँचना चाहिए। छिड़काव से पहले खेत का पानी 2 दिन के लिए निकाल दें।"
+    },
+    "organic_remedy": {
+      "title": "Neem Oil 10,000 PPM + Beauveria Bassiana",
+      "title_hi": "नीम का तेल (10000 PPM) व बवेरिया बैसियाना",
+      "instructions": "Mix 1 litre of Neem oil 10,000 ppm and 1 kg Beauveria bassiana bio-pesticide powder in 200 litres of water with 100 ml liquid soap emulsifier. Spray at the base.",
+      "instructions_hi": "1 लीटर नीम तेल (10,000 ppm) और 1 किलो बवेरिया बैसियाना को 200 लीटर पानी में 100 मिली साबुन के घोल के साथ मिलाकर पौधों की जड़ों के पास छिड़कें।",
+      "safety_notes": "Apply during late evening as fungal bio-agents are sensitive to midday solar radiation.",
+      "safety_notes_hi": "जैविक कवक तेज धूप से नष्ट हो जाते हैं, इसलिए छिड़काव शाम 4 बजे के बाद ही करें।"
+    },
+    "sources": ["ICAR-IIRR Hyderabad BPH Management Manual 2024", "National Bureau of Agricultural Insect Resources"],
+    "disclaimer_hi": "यह प्रारंभिक सलाह है। कोई भी रासायनिक उपचार करने से पहले अपने नजदीकी कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से संपर्क करें।",
+    "disclaimer_en": "This is preliminary guidance. Consult your local Krishi Vigyan Kendra (KVK) or agricultural officer before applying any treatment."
+  },
+  {
+    "id": "ICAR-COTTON-PBW-2024",
+    "crop": "cotton",
+    "crop_hi": "कपास",
+    "symptoms": [
+      "rosetted flowers",
+      "holes in green bolls",
+      "premature boll opening",
+      "caterpillar inside bolls",
+      "gulabi sundi",
+      "pink bollworm"
+    ],
+    "likely_cause": "Pink Bollworm (Pectinophora gossypiella) / गुलाबी सुंडी",
+    "likely_cause_hi": "गुलाबी सुंडी (पिंक बॉलवॉर्म कीट)",
+    "cause_category": "pest",
+    "confidence": 0.89,
+    "chemical_remedy": {
+      "title": "Emamectin Benzoate 5% SG (प्रोक्लेम)",
+      "title_hi": "इमामेक्टिन बेंजोएट 5% SG (प्रोक्लेम)",
+      "instructions": "Mix 100g of Emamectin Benzoate 5% SG in 200 litres of water per acre. Spray on cotton plants when rosette flowers or boll damage exceeds 5%.",
+      "instructions_hi": "100 ग्राम इमामेक्टिन बेंजोएट 5% SG को 200 लीटर पानी में घोलकर प्रति एकड़ छिड़कें। जब 5% फूलों में सुंडी के लक्षण दिखें तब तुरंत छिड़कें।",
+      "safety_notes": "Do not repeat the same chemical class repeatedly to prevent pest resistance. Wear rubber boots and mask.",
+      "safety_notes_hi": "कीटों में प्रतिरोधक क्षमता न बने इसलिए लगातार एक ही कीटनाशक न छिड़कें। सुरक्षा उपकरणों का प्रयोग करें।"
+    },
+    "organic_remedy": {
+      "title": "Pheromone Traps & Neem Seed Kernel Extract (NSKE 5%)",
+      "title_hi": "फेरोमोन ट्रैप व नीम बीज गिरी अर्क (NSKE 5%)",
+      "instructions": "Install 8-10 Gossyplure pheromone traps per acre to monitor and trap adult moths. Spray 5% NSKE (boiled extract of 5 kg crushed neem seeds in 100 litres of water) every week.",
+      "instructions_hi": "खेत में प्रति एकड़ 8-10 फेरोमोन ट्रैप (नर पतंगों को पकड़ने के लिए) लगाएं। साथ ही 5% नीम बीज अर्क (NSKE) का हर हफ्ते छिड़काव करें।",
+      "safety_notes": "Replace pheromone lures every 30 days. Destroy infested rosetted flowers manually.",
+      "safety_notes_hi": "फेरोमोन ल्यूर को हर 30 दिन में बदलें। ग्रसित फूलों को तोड़कर नष्ट कर दें।"
+    },
+    "sources": ["ICAR-CICR Nagpur Cotton Advisory 2024", "Directorate of Plant Protection, Quarantine & Storage"],
+    "disclaimer_hi": "यह प्रारंभिक सलाह है। कोई भी रासायनिक उपचार करने से पहले अपने नजदीकी कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से संपर्क करें।",
+    "disclaimer_en": "This is preliminary guidance. Consult your local Krishi Vigyan Kendra (KVK) or agricultural officer before applying any treatment."
+  },
+  {
+    "id": "ICAR-MUSTARD-WR-2024",
+    "crop": "mustard",
+    "crop_hi": "सरसों",
+    "symptoms": [
+      "white pustules on lower leaf surface",
+      "swollen floral parts",
+      "staghead formation",
+      "safed ratua",
+      "white rust"
+    ],
+    "likely_cause": "White Rust (Albugo candida) / सफेद रतुआ (कंगनी)",
+    "likely_cause_hi": "सफेद रतुआ / छाछिया (फफूंद रोग)",
+    "cause_category": "disease",
+    "confidence": 0.87,
+    "chemical_remedy": {
+      "title": "Metalaxyl 8% + Mancozeb 64% WP (रिडोमिल)",
+      "title_hi": "मेटालेक्सिल 8% + मैंकोजेब 64% WP (रिडोमिल)",
+      "instructions": "Mix 400g of Metalaxyl + Mancozeb WP in 200 litres of water per acre. Spray upon initial detection of white pustules on leaves.",
+      "instructions_hi": "400 ग्राम मेटालेक्सिल + मैंकोजेब 72% WP को 200 लीटर पानी में मिलाकर प्रति एकड़ छिड़कें। पत्ती के नीचे सफेद फफोले दिखते ही छिड़काव करें।",
+      "safety_notes": "Maintain 21 days withholding period before harvest. Store chemicals away from livestock.",
+      "safety_notes_hi": "फसल कटाई से कम से कम 21 दिन पहले छिड़काव बंद कर दें। दवाइयों को पशुओं से दूर रखें।"
+    },
+    "organic_remedy": {
+      "title": "Dashparni Ark & Garlic Spray (दशपर्णी अर्क व लहसुन अर्क)",
+      "title_hi": "दशपर्णी अर्क व लहसुन-तीखी मिर्च का काढ़ा",
+      "instructions": "Mix 5 litres of Dashparni Ark or 2 kg crushed garlic extract in 100 litres of water. Add 200g turmeric powder and spray thoroughly over the crop canopy.",
+      "instructions_hi": "5 लीटर दशपर्णी अर्क या 2 किलो पिसा हुआ लहसुन का अर्क 100 लीटर पानी में 200 ग्राम हल्दी मिलाकर पत्तियों पर अच्छी तरह छिड़कें।",
+      "safety_notes": "Prepare Dashparni Ark in shade with fresh leaves. Spray during early morning hours.",
+      "safety_notes_hi": "अर्क को छाया में तैयार करें और सुबह के समय छिड़काव करें।"
+    },
+    "sources": ["ICAR-DRMR Bharatpur Rapeseed-Mustard Guide 2024", "CCS HAU Hisar Agriculture Bulletin"],
+    "disclaimer_hi": "यह प्रारंभिक सलाह है। कोई भी रासायनिक उपचार करने से पहले अपने नजदीकी कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से संपर्क करें।",
+    "disclaimer_en": "This is preliminary guidance. Consult your local Krishi Vigyan Kendra (KVK) or agricultural officer before applying any treatment."
+  },
+  {
+    "id": "ICAR-TOMATO-LB-2024",
+    "crop": "tomato",
+    "crop_hi": "टमाटर",
+    "symptoms": [
+      "dark brown water soaked spots",
+      "white fungal growth on underside",
+      "rapid rotting of green fruit",
+      "late blight",
+      "pichheti jhulsa"
+    ],
+    "likely_cause": "Late Blight (Phytophthora infestans) / पिछेती झुलसा",
+    "likely_cause_hi": "पिछेती झुलसा (लेट ब्लाइट)",
+    "cause_category": "disease",
+    "confidence": 0.88,
+    "chemical_remedy": {
+      "title": "Cymoxanil 8% + Mancozeb 64% WP (कर्जेट)",
+      "title_hi": "साइमोक्सानिल 8% + मैंकोजेब 64% WP (कर्जेट)",
+      "instructions": "Dissolve 500g in 200 litres of water per acre. Spray thoroughly on both leaf surfaces and stems during cloudy/humid conditions.",
+      "instructions_hi": "500 ग्राम कजेट (साइमोक्सानिल + मैंकोजेब) को 200 लीटर पानी में मिलाकर प्रति एकड़ छिड़कें। बादलों वाले नम मौसम में पत्तियों के दोनों ओर छिड़कें।",
+      "safety_notes": "Avoid overhead sprinkler irrigation which increases leaf wetness and disease spread.",
+      "safety_notes_hi": "फव्वारा सिंचाई से बचें जिससे पत्तियां गीली रहती हैं और रोग तेजी से फैलता है।"
+    },
+    "organic_remedy": {
+      "title": "Trichoderma Viride & Copper-Curd Slurry (ट्राइकोडर्मा व तांबे की छाछ)",
+      "title_hi": "ट्राइकोडर्मा विरिडी व तांबे के बर्तन की खट्टी छाछ",
+      "instructions": "Spray 1 kg Trichoderma viride (2x10^9 cfu/g) along with 5 litres of copper-pot fermented buttermilk in 150 litres of water per acre. Spray every 7 days.",
+      "instructions_hi": "1 किलो ट्राइकोडर्मा विरिडी और 5 लीटर तांबे के बर्तन में रखी खट्टी छाछ को 150 लीटर पानी में मिलाकर प्रति एकड़ छिड़कें। 7 दिन के अंतराल पर दोहराएं।",
+      "safety_notes": "Do not mix chemical fungicides with Trichoderma bio-control agent.",
+      "safety_notes_hi": "ट्राइकोडर्मा के साथ किसी भी रासायनिक कवकनाशी को न मिलाएं।"
+    },
+    "sources": ["ICAR-IIHR Bangalore Vegetable Protection Bulletin 2024", "National Horticulture Board"],
+    "disclaimer_hi": "यह प्रारंभिक सलाह है। कोई भी रासायनिक उपचार करने से पहले अपने नजदीकी कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से संपर्क करें।",
+    "disclaimer_en": "This is preliminary guidance. Consult your local Krishi Vigyan Kendra (KVK) or agricultural officer before applying any treatment."
+  },
+  {
+    "id": "ICAR-GENERAL-DEF-2024",
+    "crop": "general",
+    "crop_hi": "सामान्य फसल",
+    "symptoms": [
+      "general yellowing",
+      "leaf spot",
+      "nutrient deficiency",
+      "stunted growth",
+      "unknown leaf damage",
+      "pila rang"
+    ],
+    "likely_cause": "Micronutrient Deficiency (Zinc / Iron) / सूक्ष्म पोषक तत्व की कमी",
+    "likely_cause_hi": "सूक्ष्म पोषक तत्व (जिंक / आयरन) की कमी",
+    "cause_category": "deficiency",
+    "confidence": 0.75,
+    "chemical_remedy": {
+      "title": "Chelated Micronutrient Foliar Spray (चिलेटेड सूक्ष्म पोषक)",
+      "title_hi": "ग्रेड-2 सूक्ष्म पोषक तत्व मिश्रण (चिलेटेड)",
+      "instructions": "Dissolve 500g of Grade-2 multi-micronutrient mixture (Zinc, Iron, Manganese, Boron) in 200 litres of water per acre and spray on green foliage.",
+      "instructions_hi": "500 ग्राम ग्रेड-2 सूक्ष्म पोषक तत्व मिश्रण को 200 लीटर पानी में घोलकर प्रति एकड़ हरी पत्तियों पर छिड़काव करें।",
+      "safety_notes": "Spray early morning or after 4 PM to avoid leaf burning. Check soil pH before application.",
+      "safety_notes_hi": "धूप में छिड़काव न करें। सुबह या शाम को ही छिड़कें।"
+    },
+    "organic_remedy": {
+      "title": "Enriched Panchagavya & Cow Dung Slurry (पंचगव्य व गोबर खाद)",
+      "title_hi": "पंचगव्य (3% घोल) व जीवामृत",
+      "instructions": "Mix 3 litres of Panchagavya in 100 litres of water (3% solution) along with 500g jaggery. Spray on leaves every 15 days to stimulate vigorous green growth.",
+      "instructions_hi": "3 लीटर पंचगव्य को 100 लीटर पानी (3% घोल) में मिलाकर पत्तियों पर छिड़कें। 15 दिन में दोहराने से पौधों में हरापन और रोग प्रतिरोधक क्षमता बढ़ती है।",
+      "safety_notes": "Stir well before dilution. Keep prepared solution out of direct sunlight.",
+      "safety_notes_hi": "उपयोग से पहले अच्छी तरह हिलाएं और धूप से दूर रखें।"
+    },
+    "sources": ["ICAR-IARI Division of Agronomy Advisory 2024", "ICAR Krishi Vigyan Kendra Farm Guidelines"],
+    "disclaimer_hi": "यह प्रारंभिक सलाह है। कोई भी रासायनिक उपचार करने से पहले अपने नजदीकी कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से संपर्क करें।",
+    "disclaimer_en": "This is preliminary guidance. Consult your local Krishi Vigyan Kendra (KVK) or agricultural officer before applying any treatment."
+  }
+]
