@@ -7,8 +7,8 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_chat_route_is_explicitly_not_implemented() -> None:
-    """The chat contract is mounted and returns 501 until the orchestrator exists."""
+def test_chat_route_orchestration() -> None:
+    """The chat contract is mounted and returns 200 with orchestrated agent reply."""
 
     response = client.post(
         "/api/chat",
@@ -19,5 +19,8 @@ def test_chat_route_is_explicitly_not_implemented() -> None:
         },
     )
 
-    assert response.status_code == 501
-    assert "not implemented" in response.json()["detail"].lower()
+    assert response.status_code == 200
+    data = response.json()
+    assert "reply" in data
+    assert len(data["reply"]) > 0
+    assert "agent" in data

@@ -492,6 +492,8 @@ app.include_router(router)
 app.include_router(router, prefix="/api")
 
 try:
+    from app.api.routes import chat as chat_module
+    from app.api.routes import diagnose as diagnose_module
     from app.api.routes import geocode as geocode_module
     from app.api.routes import places as places_module
     from app.api.routes import reports as reports_module
@@ -511,5 +513,9 @@ try:
     app.include_router(reports_module.router)
     app.include_router(places_module.router, prefix="/api")
     app.include_router(places_module.router)
+    app.include_router(diagnose_module.router, prefix="/api")
+    app.include_router(diagnose_module.router)
+    app.include_router(chat_module.router, prefix="/api")
+    app.include_router(chat_module.router)
 except Exception:
     pass

@@ -19,6 +19,8 @@ class Intent(StrEnum):
     STRESS_MONITOR = "stress_monitor"
     SCHEME_ADVISOR = "scheme_advisor"
     LOCAL_FINDER = "local_finder"
+    FERTILIZER_NUTRIENT = "fertilizer_nutrient"
+    TREATMENT = "treatment"
     GENERAL = "general"
 
 

@@ -44,6 +44,17 @@ class Settings(BaseSettings):
     gemini_temperature: float = 0.2
     gemini_max_output_tokens: int = 2048
 
+    llm_provider: str = "gemini"
+    groq_api_key: str = ""
+    groq_model: str = "llama-3.3-70b-versatile"
+    groq_vision_model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    groq_base_url: str = "https://api.groq.com/openai/v1"
+    groq_timeout_seconds: float = 30.0
+    meko_api_key: str = ""
+    meko_base_url: str = "https://api.mekodata.ai/api/v1"
+    meko_mcp_url: str = "https://mcp.mekodata.ai/mcp"
+    meko_datapack_id: str = ""
+
     speech_language_code: str = "hi-IN"
     speech_stt_model: str = "latest_long"
     speech_tts_voice: str = "hi-IN-Wavenet-A"

@@ -124,10 +124,17 @@ class SpeechProvider(ABC):
 
 def get_llm_provider() -> LLMProvider:
     """Return the configured LLM provider implementation."""
+    settings = get_settings()
+    if settings.llm_provider == "groq" or (
+        settings.groq_api_key and not settings.google_cloud_project
+    ):
+        from app.llm.groq import GroqProvider
+
+        return GroqProvider(settings)
 
     from app.llm.gemini import GeminiProvider
 
-    return GeminiProvider(get_settings())
+    return GeminiProvider(settings)
 
 
 def get_speech_provider() -> SpeechProvider:

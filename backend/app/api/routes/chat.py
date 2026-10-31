@@ -1,22 +1,19 @@
 """Conversational chat endpoint.
 
-The route will hand the turn to the LangGraph orchestrator once agent logic exists.
+Hands the turn to the LangGraph multi-agent orchestrator.
 """
 
-from fastapi import APIRouter, HTTPException, status
+from __future__ import annotations
 
+from fastapi import APIRouter, status
+
+from app.agents.orchestrator import run_chat
 from app.models.chat import ChatRequest, ChatResponse
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
-@router.post("", response_model=ChatResponse, status_code=status.HTTP_501_NOT_IMPLEMENTED)
+@router.post("", response_model=ChatResponse, status_code=status.HTTP_200_OK)
 async def chat(request: ChatRequest) -> ChatResponse:
     """Route a farmer message to the appropriate specialist agent."""
-
-    # TODO: lazily import the orchestrator and call ``run_chat(request)``.
-    _ = request
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Chat orchestration is not implemented yet.",
-    )
+    return await run_chat(request)
