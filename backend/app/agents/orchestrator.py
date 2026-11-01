@@ -10,9 +10,9 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 
 from app.agents import (
-    crop_planner,
     disease_doctor,
     fertilizer_agent,
+    general_assistant,
     local_finder,
     scheme_advisor,
     soil_analyst,
@@ -25,7 +25,7 @@ from app.models.chat import ChatRequest, ChatResponse
 NodeHandler = Callable[[AgentState], Awaitable[AgentState]]
 
 AGENT_NODES: dict[str, NodeHandler] = {
-    "crop_planner": crop_planner.run,
+    "crop_planner": general_assistant.run,
     "disease_doctor": disease_doctor.run,
     "soil_analyst": soil_analyst.run,
     "stress_monitor": stress_monitor.run,
@@ -33,9 +33,11 @@ AGENT_NODES: dict[str, NodeHandler] = {
     "local_finder": local_finder.run,
     "fertilizer_agent": fertilizer_agent.run,
     "treatment_agent": treatment_agent.run,
+    "general_assistant": general_assistant.run,
 }
 
 INTENT_TO_NODE: dict[Intent, str] = {
+    Intent.GENERAL: "general_assistant",
     Intent.CROP_PLANNER: "crop_planner",
     Intent.DISEASE_DOCTOR: "disease_doctor",
     Intent.SOIL_ANALYST: "soil_analyst",
@@ -94,37 +96,70 @@ def classify_intent(message: str, context: dict[str, Any]) -> Intent:
         except ValueError:
             pass
 
-    m_low = message.lower()
+    m_low = message.strip().lower()
+
+    # Greetings & basic conversational prompts
+    greetings = [
+        "नमस्ते", "नमस्कार", "हेलो", "हैलो", "प्रणाम", "राम राम", "जय किसान",
+        "hello", "hi", "hey", "good morning", "good evening", "how are you",
+        "who are you", "आप कौन हो", "तुम कौन हो", "help", "मदद",
+    ]
+    words = m_low.split()
+    if len(words) <= 3 and any(g in m_low for g in greetings):
+        return Intent.GENERAL
+
+    # 1. Action-oriented Treatment & IPM (sprays, cures, dosages, remedies)
     if any(
         k in m_low
         for k in [
             "दवा", "उपचार", "छिड़काव", "स्प्रे", "रोकथाम", "कीटनाशक", "इलाज",
-            "cure", "treatment", "spray", "fungicide", "pesticide",
+            "cure", "treatment", "spray", "fungicide", "pesticide", "control",
         ]
     ):
         return Intent.TREATMENT
+
+    # 2. Fertilizer & Nutrients (NPK, urea, DAP, manure, compost, dosage)
     if any(
         k in m_low
         for k in [
-            "खाद", "यूरिया", "डीएपी", "उर्वरक", "जिंक", "पोटाश",
-            "dap", "urea", "fertilizer", "npk", "nutrient",
+            "खाद", "यूरिया", "डीएपी", "उर्वरक", "जिंक", "पोटाश", "पोषक", "गोबर",
+            "dap", "urea", "fertilizer", "npk", "nutrient", "potash", "zinc",
         ]
     ):
         return Intent.FERTILIZER_NUTRIENT
+
+    # 3. Disease & Symptoms (spots, blight, rust, wilting, leaf yellowing, pest attack)
     if any(
         k in m_low
         for k in [
-            "रोग", "धब्बे", "झुलसा", "कीड़ा", "फंगस", "पत्तियां", "पीली",
-            "disease", "rust", "blight", "spots", "fungus", "lesion",
+            "रोग", "बीमारी", "धब्बे", "झुलसा", "कीड़ा", "फंगस", "पत्तियां", "पीली",
+            "सड़न", "सुंडी", "माहू", "रतुआ",
+            "disease", "rust", "blight", "spots", "fungus", "lesion", "rot", "wilt",
+            "pest", "bollworm", "hopper", "symptom",
         ]
     ):
         return Intent.DISEASE_DOCTOR
-    if any(k in m_low for k in ["योजना", "सब्सिडी", "pm-kisan", "pmkisan", "scheme"]):
+
+    # 4. Crop Planning / Selection / Sowing
+    if any(
+        k in m_low
+        for k in [
+            "फसल", "बोएं", "बुवाई", "पैदावार", "किस्म", "सीजन",
+            "crop", "plant", "sow", "sowing", "yield", "variety", "season",
+        ]
+    ):
+        return Intent.CROP_PLANNER
+
+    # 5. Government Schemes
+    if any(k in m_low for k in ["योजना", "सब्सिडी", "pm-kisan", "pmkisan", "scheme", "kcc"]):
         return Intent.SCHEME_ADVISOR
-    if any(k in m_low for k in ["मंडी", "भाव", "रेट", "mandi", "price"]):
+
+    # 6. Mandi & Market
+    if any(k in m_low for k in ["मंडी", "भाव", "रेट", "दुकान", "mandi", "price", "market"]):
         return Intent.LOCAL_FINDER
 
-    return Intent.DISEASE_DOCTOR
+    # Fallback to general conversational assistant (never force disease diagnosis!)
+    return Intent.GENERAL
 
 
 async def run_chat(request: ChatRequest) -> ChatResponse:
@@ -132,7 +167,7 @@ async def run_chat(request: ChatRequest) -> ChatResponse:
     from app.models.farmer import ExperienceMode, Language
 
     intent = classify_intent(request.message, request.context)
-    node_name = INTENT_TO_NODE.get(intent, "disease_doctor")
+    node_name = INTENT_TO_NODE.get(intent, "general_assistant")
 
     lang = Language.ENGLISH if request.language == "en" else Language.HINDI
     exp = (
@@ -140,6 +175,27 @@ async def run_chat(request: ChatRequest) -> ChatResponse:
         if request.experience_mode == "experienced"
         else ExperienceMode.NEW_FARMER
     )
+
+    context = dict(request.context)
+    if "crop" not in context:
+        for alias, c_name in [
+            ("गेहूं", "wheat"),
+            ("wheat", "wheat"),
+            ("धान", "rice"),
+            ("चावल", "rice"),
+            ("rice", "rice"),
+            ("सरसों", "mustard"),
+            ("mustard", "mustard"),
+            ("आलू", "potato"),
+            ("potato", "potato"),
+            ("टमाटर", "tomato"),
+            ("tomato", "tomato"),
+            ("कपास", "cotton"),
+            ("cotton", "cotton"),
+        ]:
+            if alias in request.message.lower():
+                context["crop"] = c_name
+                break
 
     state = AgentState(
         farmer_id=request.farmer_id,
@@ -149,16 +205,18 @@ async def run_chat(request: ChatRequest) -> ChatResponse:
         language=lang,
         experience_mode=exp,
         message=request.message,
-        context=request.context,
+        context=context,
     )
 
-    handler = AGENT_NODES.get(node_name, disease_doctor.run)
+    handler = AGENT_NODES.get(node_name, general_assistant.run)
     result_state = await handler(state)
 
     # Format reply based on agent result
     reply = ""
     sources = list(result_state.sources)
-    if "fertilizer_plan" in result_state.result:
+    if "general_reply" in result_state.result:
+        reply = str(result_state.result["general_reply"])
+    elif "fertilizer_plan" in result_state.result:
         plan = result_state.result["fertilizer_plan"]
         crop_title = plan.get("crop", "फसल")
         basal_str = " ".join(plan.get("basal_dose", []))

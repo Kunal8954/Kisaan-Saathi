@@ -52,6 +52,27 @@ def _load_catalog() -> list[dict[str, Any]]:
         return []
 
 
+CROP_ALIASES: dict[str, str] = {
+    "गेहूं": "wheat",
+    "गेहू": "wheat",
+    "wheat": "wheat",
+    "धान": "rice",
+    "चावल": "rice",
+    "rice": "rice",
+    "paddy": "rice",
+    "सरसों": "mustard",
+    "राई": "mustard",
+    "mustard": "mustard",
+    "आलू": "tomato",
+    "potato": "tomato",
+    "aloo": "tomato",
+    "टमाटर": "tomato",
+    "tomato": "tomato",
+    "कपास": "cotton",
+    "cotton": "cotton",
+}
+
+
 def _match_catalog_entry(
     crop: str | None,
     symptom_hints: str,
@@ -61,29 +82,49 @@ def _match_catalog_entry(
     if not catalog:
         raise ValueError("Agronomy knowledge catalog is empty or missing.")
 
-    normalized_crop = (crop or "").strip().lower()
     normalized_hints = symptom_hints.strip().lower()
+
+    resolved_crop = (crop or "").strip().lower()
+    if resolved_crop in CROP_ALIASES:
+        resolved_crop = CROP_ALIASES[resolved_crop]
+    elif not resolved_crop:
+        for alias, c_name in CROP_ALIASES.items():
+            if alias in normalized_hints:
+                resolved_crop = c_name
+                break
 
     scored: list[tuple[int, dict[str, Any]]] = []
     for entry in catalog:
         score = 0
         entry_crop = str(entry.get("crop", "")).lower()
-        if normalized_crop and (normalized_crop in entry_crop or entry_crop in normalized_crop):
-            score += 10
+
+        if resolved_crop:
+            if resolved_crop == entry_crop:
+                score += 50
+            elif entry_crop == "general":
+                score += 5
+            else:
+                score -= 30
 
         symptoms = [str(s).lower() for s in entry.get("symptoms", [])]
         for symptom in symptoms:
-            if any(term in normalized_hints for term in symptom.split()):
-                score += 3
+            for term in symptom.split():
+                if len(term) > 2 and term in normalized_hints:
+                    score += 4
 
-        if entry.get("disease_name", "").lower() in normalized_hints:
-            score += 15
+        likely_cause = str(entry.get("likely_cause", "")).lower()
+        likely_cause_hi = str(entry.get("likely_cause_hi", "")).lower()
+        for word in likely_cause.replace("/", " ").replace("(", " ").replace(")", " ").split():
+            if len(word) > 3 and word in normalized_hints:
+                score += 15
+        for word in likely_cause_hi.replace("/", " ").replace("(", " ").replace(")", " ").split():
+            if len(word) > 2 and word in normalized_hints:
+                score += 15
 
         scored.append((score, entry))
 
     scored.sort(key=lambda item: item[0], reverse=True)
-    best_match = scored[0][1]
-    return best_match
+    return scored[0][1]
 
 
 async def diagnose_image(
@@ -92,6 +133,7 @@ async def diagnose_image(
     crop: str | None,
     farm_id: UUID | None,
     language: str,
+    symptom_hints: str = "",
 ) -> DiagnosisResult:
     """Diagnose an image with Groq multimodal vision when configured, or grounded catalog."""
     settings = get_settings()
@@ -183,8 +225,8 @@ async def diagnose_image(
             pass
 
     # 2. Grounded Agronomy Catalog Retrieval
-    symptom_hints = f"{crop or ''} yellow spots blight leaf rust wilting rot"
-    entry = _match_catalog_entry(crop, symptom_hints)
+    active_hints = symptom_hints.strip() if symptom_hints.strip() else (crop or "")
+    entry = _match_catalog_entry(crop, active_hints)
 
     cause_category = (
         CauseCategory.NUTRIENT_DEFICIENCY
@@ -277,6 +319,7 @@ async def run(state: AgentState) -> AgentState:
         crop=crop if crop else None,
         farm_id=state.farm_id,
         language=lang_str,
+        symptom_hints=state.message,
     )
 
     state.result["diagnosis"] = diagnosis.model_dump(mode="json")

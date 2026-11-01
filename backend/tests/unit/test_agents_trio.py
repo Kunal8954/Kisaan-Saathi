@@ -113,3 +113,35 @@ def test_api_chat_endpoint() -> None:
     assert len(data["reply"]) > 10
     assert "agent" in data
     assert "sources" in data
+
+
+@pytest.mark.asyncio
+async def test_general_greeting_does_not_hallucinate_disease() -> None:
+    req_hi = ChatRequest(message="नमस्ते", language="hi")
+    resp_hi = await orchestrator.run_chat(req_hi)
+    assert resp_hi.agent == "general_assistant"
+    assert resp_hi.intent == "general"
+    assert "नमस्ते" in resp_hi.reply
+    assert "पीला रतुआ" not in resp_hi.reply
+
+    req_en = ChatRequest(message="Hello how are you", language="en")
+    resp_en = await orchestrator.run_chat(req_en)
+    assert resp_en.agent == "general_assistant"
+    assert resp_en.intent == "general"
+    assert "yellow rust" not in resp_en.reply.lower()
+
+
+@pytest.mark.asyncio
+async def test_crop_specific_disease_matching() -> None:
+    # Rice disease must match bacterial blight, not wheat rust
+    req_rice = ChatRequest(message="धान के पत्तों पर जीवाणु झुलसा रोग है", language="hi")
+    resp_rice = await orchestrator.run_chat(req_rice)
+    assert resp_rice.agent == "disease_doctor"
+    assert "जीवाणु झुलसा" in resp_rice.reply or "ब्लाइट" in resp_rice.reply
+    assert "पीला रतुआ" not in resp_rice.reply
+
+    # Cotton pest must match pink bollworm
+    req_cotton = ChatRequest(message="कपास में गुलाबी सुंडी का प्रकोप है", language="hi")
+    resp_cotton = await orchestrator.run_chat(req_cotton)
+    assert resp_cotton.agent == "disease_doctor"
+    assert "गुलाबी सुंडी" in resp_cotton.reply or "बॉलवॉर्म" in resp_cotton.reply
