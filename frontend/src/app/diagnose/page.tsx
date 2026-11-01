@@ -13,9 +13,13 @@ const CROPS = [
   { id: "", labelKey: "cropAuto" },
   { id: "wheat", labelKey: "cropWheat" },
   { id: "rice", labelKey: "cropRice" },
-  { id: "cotton", labelKey: "cropCotton" },
+  { id: "potato", labelKey: "cropPotato" },
   { id: "mustard", labelKey: "cropMustard" },
   { id: "tomato", labelKey: "cropTomato" },
+  { id: "cotton", labelKey: "cropCotton" },
+  { id: "chili", labelKey: "cropChili" },
+  { id: "onion", labelKey: "cropOnion" },
+  { id: "gram", labelKey: "cropGram" },
   { id: "general", labelKey: "cropGeneral" },
 ] as const;
 

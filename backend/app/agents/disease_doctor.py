@@ -63,13 +63,26 @@ CROP_ALIASES: dict[str, str] = {
     "सरसों": "mustard",
     "राई": "mustard",
     "mustard": "mustard",
-    "आलू": "tomato",
-    "potato": "tomato",
-    "aloo": "tomato",
+    "आलू": "potato",
+    "potato": "potato",
+    "aloo": "potato",
     "टमाटर": "tomato",
     "tomato": "tomato",
     "कपास": "cotton",
+    "नरमा": "cotton",
     "cotton": "cotton",
+    "मिर्च": "chili",
+    "chili": "chili",
+    "chilli": "chili",
+    "pepper": "chili",
+    "प्याज": "onion",
+    "लहसुन": "onion",
+    "onion": "onion",
+    "garlic": "onion",
+    "चना": "gram",
+    "chana": "gram",
+    "chickpea": "gram",
+    "gram": "gram",
 }
 
 
@@ -166,7 +179,22 @@ async def diagnose_image(
                     max_output_tokens=1200,
                 )
             )
-            parsed = json.loads(response.text)
+            raw_text = response.text.strip()
+            if "```" in raw_text:
+                parts = raw_text.split("```")
+                for p in parts:
+                    clean = p.strip()
+                    if clean.startswith("json"):
+                        clean = clean[4:].strip()
+                    if clean.startswith("{") and clean.endswith("}"):
+                        raw_text = clean
+                        break
+            if "{" in raw_text and "}" in raw_text:
+                start = raw_text.find("{")
+                end = raw_text.rfind("}") + 1
+                raw_text = raw_text[start:end]
+
+            parsed = json.loads(raw_text)
             cause_cat_str = str(parsed.get("cause_category", "disease")).lower()
             if "pest" in cause_cat_str:
                 cause_cat = CauseCategory.PEST
@@ -206,7 +234,7 @@ async def diagnose_image(
                         ),
                     ),
                 ]
-                conf = float(parsed.get("confidence", 0.85))
+                conf = float(parsed.get("confidence", 0.88))
                 conf = min(0.99, max(0.40, conf))
 
                 return DiagnosisResult(
@@ -231,7 +259,11 @@ async def diagnose_image(
     cause_category = (
         CauseCategory.NUTRIENT_DEFICIENCY
         if entry.get("cause_category") == "deficiency"
-        else CauseCategory.DISEASE
+        else (
+            CauseCategory.PEST
+            if entry.get("cause_category") == "pest"
+            else CauseCategory.DISEASE
+        )
     )
 
     chem_data = entry.get("chemical_remedy", {})
@@ -245,6 +277,11 @@ async def diagnose_image(
         if lang == Language.ENGLISH
         else chem_data.get("title_hi", chem_data.get("title", ""))
     )
+    chem_safety = (
+        chem_data.get("safety_notes", "")
+        if lang == Language.ENGLISH
+        else chem_data.get("safety_notes_hi", chem_data.get("safety_notes", ""))
+    )
 
     org_data = entry.get("organic_remedy", {})
     org_inst = (
@@ -257,6 +294,11 @@ async def diagnose_image(
         if lang == Language.ENGLISH
         else org_data.get("title_hi", org_data.get("title", ""))
     )
+    org_safety = (
+        org_data.get("safety_notes", "")
+        if lang == Language.ENGLISH
+        else org_data.get("safety_notes_hi", org_data.get("safety_notes", ""))
+    )
 
     doc_id = str(entry.get("id", "ICAR-AGRO-2024"))
     remedies = [
@@ -265,14 +307,14 @@ async def diagnose_image(
             title=chem_title or "Chemical Spray",
             instructions=chem_inst or "Apply as directed.",
             source_ids=[doc_id],
-            safety_notes=chem_data.get("safety_notes"),
+            safety_notes=chem_safety or "Wear gloves and mask.",
         ),
         Remedy(
             remedy_type=RemedyType.ORGANIC_COW_DUNG,
             title=org_title or "Organic Bio-Control",
             instructions=org_inst or "Apply organic spray.",
             source_ids=[doc_id],
-            safety_notes=org_data.get("safety_notes"),
+            safety_notes=org_safety or "Safe for beneficial insects.",
         ),
     ]
 

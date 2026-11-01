@@ -60,6 +60,10 @@ async def run(state: AgentState) -> AgentState:
 
     # Check if message is a simple greeting
     is_greeting = any(w in msg_lower for w in GREETING_WORDS) and len(msg_lower.split()) <= 4
+    if is_greeting:
+        state.result["general_reply"] = DEFAULT_GREETING_EN if is_en else DEFAULT_GREETING_HI
+        return state
+
     is_crop_plan = any(
         w in msg_lower
         for w in ["फसल", "बोएं", "बुवाई", "पैदावार", "सीजन", "crop", "sow", "plant", "season"]

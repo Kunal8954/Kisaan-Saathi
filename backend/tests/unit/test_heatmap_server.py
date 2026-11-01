@@ -172,5 +172,5 @@ def test_heatmap_returns_image_and_proper_metrics() -> None:
     assert isinstance(metrics["ndvi_baseline"], float)
     assert isinstance(metrics["ndmi"], float)
     assert isinstance(metrics["land_surface_temperature_c"], float)
-    assert isinstance(metrics["soil_moisture"], float)
+    assert metrics["soil_moisture"] is None or isinstance(metrics["soil_moisture"], float)
     assert len(metrics["baseline_years"]) == 3

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 
+import pytest
 from fastapi.testclient import TestClient
 from pypdf import PdfWriter
 
@@ -11,13 +12,14 @@ from app.main import app
 from app.services.soil_parser import parse_soil_document
 
 
-def test_parse_soil_document_from_text() -> None:
+@pytest.mark.asyncio
+async def test_parse_soil_document_from_text() -> None:
     text = (
         b"Kisan Soil Health Card: pH: 7.2, EC: 0.35 dS/m, Organic Carbon: 0.62%, "
         b"Available Nitrogen: 290 kg/ha, Phosphorus: 19.5 kg/ha, Potassium: 240 kg/ha, "
         b"Zinc: 0.75 ppm, Sulphur: 12.0 ppm"
     )
-    res = parse_soil_document(text, "shc_report.txt")
+    res = await parse_soil_document(text, "shc_report.txt")
     assert res.health_score > 50
     assert len(res.parameters) == 8
     assert len(res.recommendations) >= 2
@@ -28,14 +30,15 @@ def test_parse_soil_document_from_text() -> None:
     assert "Optimal" in ph_param.rating or "संतुलित" in ph_param.rating_hi
 
 
-def test_parse_soil_document_empty_pdf() -> None:
+@pytest.mark.asyncio
+async def test_parse_soil_document_empty_pdf() -> None:
     writer = PdfWriter()
     writer.add_blank_page(width=100, height=100)
     buf = io.BytesIO()
     writer.write(buf)
     pdf_bytes = buf.getvalue()
 
-    res = parse_soil_document(pdf_bytes, "test.pdf")
+    res = await parse_soil_document(pdf_bytes, "test.pdf")
     assert res.health_score >= 35
     assert len(res.parameters) == 8
     assert res.disclaimer != ""

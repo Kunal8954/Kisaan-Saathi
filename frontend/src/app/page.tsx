@@ -10,6 +10,8 @@ const FEATURES = [
   { key: "soil", href: "/soil" },
   { key: "map", href: "/map" },
   { key: "schemes", href: "/schemes" },
+  { key: "reports", href: "/reports" },
+  { key: "places", href: "/places" },
 ] as const;
 
 export default function HomePage() {

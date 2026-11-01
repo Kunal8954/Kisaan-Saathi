@@ -1,16 +1,21 @@
 """Soil test report parser and recommendation generator.
 
-Extracts lab values from Soil Health Card PDFs and documents using pypdf,
-normalizes mineral readings, and produces grounded chemical and organic recommendations.
+Extracts lab values from Soil Health Card PDFs and documents using pypdf and
+Groq Multimodal Vision OCR, normalizes mineral readings, and produces grounded
+chemical and organic recommendations.
 """
 
 from __future__ import annotations
 
+import base64
 import io
+import json
 import re
 
 from pypdf import PdfReader
 
+from app.config import get_settings
+from app.llm.provider import LLMMessage, LLMRequest, MessageRole, get_llm_provider
 from app.models.soil import SoilAnalysisResponse, SoilParameter, SoilRecommendation
 
 
@@ -41,12 +46,76 @@ def _find_number_after_patterns(text: str, patterns: list[str]) -> float | None:
     return None
 
 
-def parse_soil_document(content: bytes, filename: str) -> SoilAnalysisResponse:
+async def _extract_soil_parameters_with_vision(
+    image_bytes: bytes,
+    mime_type: str = "image/jpeg",
+) -> dict[str, float]:
+    """Extract real numerical laboratory values from a Soil Health Card photo using Groq Vision."""
+    try:
+        settings = get_settings()
+        if not settings.groq_api_key:
+            return {}
+
+        b64_data = base64.b64encode(image_bytes).decode("ascii")
+        data_url = f"data:{mime_type};base64,{b64_data}"
+        prompt = (
+            "You are an expert soil laboratory scientist analyzing an Indian Soil Health Card "
+            "(मृदा स्वास्थ्य कार्ड) test report photo. "
+            "Extract the exact numerical laboratory test values shown in the table. "
+            "Return ONLY a valid JSON object with the following numerical keys: "
+            "ph (soil reaction pH float), "
+            "ec (electrical conductivity in dS/m float), "
+            "oc (organic carbon percentage float), "
+            "n (available nitrogen in kg/ha float), "
+            "p (available phosphorus in kg/ha float), "
+            "k (available potassium in kg/ha float), "
+            "zn (available zinc in ppm float), "
+            "s (available sulphur in ppm float)."
+        )
+
+        llm = get_llm_provider()
+        resp = await llm.generate_multimodal(
+            LLMRequest(
+                messages=[
+                    LLMMessage(role=MessageRole.USER, content=prompt, image_uris=[data_url])
+                ],
+                temperature=0.1,
+                max_output_tokens=300,
+            )
+        )
+
+        raw_text = resp.text.strip()
+        if "{" in raw_text and "}" in raw_text:
+            start = raw_text.find("{")
+            end = raw_text.rfind("}") + 1
+            raw_text = raw_text[start:end]
+
+        data = json.loads(raw_text)
+        result: dict[str, float] = {}
+        for k, v in data.items():
+            if v is not None:
+                try:
+                    result[k.lower()] = float(v)
+                except (ValueError, TypeError):
+                    pass
+        return result
+    except Exception:
+        return {}
+
+
+async def parse_soil_document(content: bytes, filename: str) -> SoilAnalysisResponse:
     """Parse a Soil Health Card PDF or image and produce mineral advisory."""
     raw_text = ""
-    if filename.lower().endswith(".pdf"):
+    f_lower = filename.lower()
+    vision_vals: dict[str, float] = {}
+
+    if f_lower.endswith(".pdf"):
         raw_text = _extract_text_from_pdf(content)
-    if not raw_text.strip():
+    elif any(f_lower.endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp"]):
+        mime = "image/png" if f_lower.endswith(".png") else "image/jpeg"
+        vision_vals = await _extract_soil_parameters_with_vision(content, mime)
+
+    if not raw_text.strip() and not vision_vals:
         try:
             decoded = content.decode("utf-8", errors="ignore")
             if any(k in decoded.lower() for k in ["ph", "carbon", "nitrogen", "soil"]):
@@ -55,7 +124,7 @@ def parse_soil_document(content: bytes, filename: str) -> SoilAnalysisResponse:
             pass
 
     # 1. Parse or default: pH
-    ph_val = _find_number_after_patterns(
+    ph_val = vision_vals.get("ph") or _find_number_after_patterns(
         raw_text,
         [
             r"p[Hh]\s*[:=\-]?\s*([0-9]+\.?[0-9]*)",
@@ -66,7 +135,7 @@ def parse_soil_document(content: bytes, filename: str) -> SoilAnalysisResponse:
         ph_val = 7.4  # typical North Indian alluvial agricultural baseline
 
     # 2. Parse or default: Electrical Conductivity (EC in dS/m)
-    ec_val = _find_number_after_patterns(
+    ec_val = vision_vals.get("ec") or _find_number_after_patterns(
         raw_text,
         [
             r"(?:E\.?C\.?|Conductivity|चालकता)\s*[:=\-]?\s*([0-9]+\.?[0-9]*)",
@@ -76,7 +145,7 @@ def parse_soil_document(content: bytes, filename: str) -> SoilAnalysisResponse:
         ec_val = 0.42
 
     # 3. Parse or default: Organic Carbon (OC in %)
-    oc_val = _find_number_after_patterns(
+    oc_val = vision_vals.get("oc") or _find_number_after_patterns(
         raw_text,
         [
             r"(?:O\.?C\.?|Organic\s+Carbon|कार्बन)\s*[:=\-]?\s*([0-9]+\.?[0-9]*)",
@@ -86,7 +155,7 @@ def parse_soil_document(content: bytes, filename: str) -> SoilAnalysisResponse:
         oc_val = 0.45
 
     # 4. Parse or default: Nitrogen (N in kg/ha)
-    n_val = _find_number_after_patterns(
+    n_val = vision_vals.get("n") or _find_number_after_patterns(
         raw_text,
         [
             r"(?:Available\s+)?(?:Nitrogen|नाइट्रोजन|N)\s*[:=\-]?\s*([0-9]+\.?[0-9]*)",
@@ -96,7 +165,7 @@ def parse_soil_document(content: bytes, filename: str) -> SoilAnalysisResponse:
         n_val = 195.0
 
     # 5. Parse or default: Phosphorus (P in kg/ha)
-    p_val = _find_number_after_patterns(
+    p_val = vision_vals.get("p") or _find_number_after_patterns(
         raw_text,
         [
             r"(?:Available\s+)?(?:Phosphorus|फॉस्फोरस|P2O5|P)\s*[:=\-]?\s*([0-9]+\.?[0-9]*)",
@@ -106,7 +175,7 @@ def parse_soil_document(content: bytes, filename: str) -> SoilAnalysisResponse:
         p_val = 14.5
 
     # 6. Parse or default: Potassium (K in kg/ha)
-    k_val = _find_number_after_patterns(
+    k_val = vision_vals.get("k") or _find_number_after_patterns(
         raw_text,
         [
             r"(?:Available\s+)?(?:Potassium|पोटाश|पोटेशियम|K2O|K)\s*[:=\-]?\s*([0-9]+\.?[0-9]*)",
@@ -116,7 +185,7 @@ def parse_soil_document(content: bytes, filename: str) -> SoilAnalysisResponse:
         k_val = 220.0
 
     # 7. Parse or default: Zinc (Zn in ppm)
-    zn_val = _find_number_after_patterns(
+    zn_val = vision_vals.get("zn") or _find_number_after_patterns(
         raw_text,
         [
             r"(?:Zinc|जस्ता|Zn)\s*[:=\-]?\s*([0-9]+\.?[0-9]*)",
@@ -126,7 +195,7 @@ def parse_soil_document(content: bytes, filename: str) -> SoilAnalysisResponse:
         zn_val = 0.48
 
     # 8. Parse or default: Sulphur (S in ppm)
-    s_val = _find_number_after_patterns(
+    s_val = vision_vals.get("s") or _find_number_after_patterns(
         raw_text,
         [
             r"(?:Sulphur|सल्फर|गंधक|S)\s*[:=\-]?\s*([0-9]+\.?[0-9]*)",

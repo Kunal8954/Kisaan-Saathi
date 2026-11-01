@@ -44,10 +44,10 @@ class Settings(BaseSettings):
     gemini_temperature: float = 0.2
     gemini_max_output_tokens: int = 2048
 
-    llm_provider: str = "gemini"
+    llm_provider: str = "groq"
     groq_api_key: str = ""
-    groq_model: str = "llama-3.3-70b-versatile"
-    groq_vision_model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    groq_model: str = "qwen/qwen3.8-27b"
+    groq_vision_model: str = "qwen/qwen3.8-27b"
     groq_base_url: str = "https://api.groq.com/openai/v1"
     groq_timeout_seconds: float = 30.0
     meko_api_key: str = ""

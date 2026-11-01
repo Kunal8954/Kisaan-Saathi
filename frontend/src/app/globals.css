@@ -1,15 +1,40 @@
 :root {
-  --green-900: #123f28;
-  --green-700: #1f6f43;
-  --green-100: #e4f0e7;
-  --gold: #f2c14e;
-  --cream: #f7f4ec;
-  --paper: #fffdf8;
-  --ink: #1f2a22;
-  --muted: #5c6b60;
-  --border: #d9dfd8;
-  --shadow: 0 14px 40px rgba(18, 63, 40, 0.08);
-  --radius: 18px;
+  --green-950: #052e16;
+  --green-900: #14532d;
+  --green-800: #166534;
+  --green-700: #15803d;
+  --green-600: #16a34a;
+  --green-500: #22c55e;
+  --green-200: #bbf7d0;
+  --green-100: #dcfce7;
+  --green-50: #f0fdf4;
+
+  --amber-600: #d97706;
+  --amber-500: #f59e0b;
+  --amber-100: #fef3c7;
+  --amber-50: #fffbeb;
+
+  --slate-900: #0f172a;
+  --slate-800: #1e293b;
+  --slate-700: #334155;
+  --slate-600: #475569;
+  --slate-500: #64748b;
+  --slate-400: #94a3b8;
+  --slate-300: #cbd5e1;
+  --slate-200: #e2e8f0;
+  --slate-100: #f1f5f9;
+  --slate-50: #f8fafc;
+
+  --gold: var(--amber-500);
+  --cream: #f8fafc;
+  --paper: #ffffff;
+  --ink: #0f172a;
+  --muted: #475569;
+  --border: #e2e8f0;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 6px 16px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.08), 0 4px 10px -4px rgba(15, 23, 42, 0.03);
+  --radius: 14px;
 }
 
 * {
@@ -18,16 +43,19 @@
 
 html {
   background: var(--cream);
+  color-scheme: light;
 }
 
 body {
   margin: 0;
   color: var(--ink);
   background:
-    radial-gradient(circle at 100% 0, rgba(242, 193, 78, 0.16), transparent 34rem),
-    var(--cream);
-  font-family: "Noto Sans Devanagari", "Nirmala UI", "Segoe UI", sans-serif;
+    radial-gradient(circle at 90% -10%, rgba(21, 128, 61, 0.05), transparent 28rem),
+    radial-gradient(circle at 10% 25%, rgba(217, 119, 6, 0.03), transparent 24rem),
+    #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Devanagari", "Nirmala UI", sans-serif;
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
@@ -39,16 +67,17 @@ a {
   position: sticky;
   top: 0;
   z-index: 20;
-  border-bottom: 1px solid rgba(217, 223, 216, 0.8);
-  background: rgba(247, 244, 236, 0.94);
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .nav {
   display: flex;
   max-width: 1080px;
   margin: 0 auto;
-  padding: 0.9rem 1rem;
+  padding: 0.85rem 1rem;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -56,28 +85,31 @@ a {
 
 .brand {
   font-weight: 800;
-  font-size: 1.2rem;
-  color: var(--green-900);
+  font-size: 1.25rem;
+  color: var(--green-800);
   white-space: nowrap;
+  letter-spacing: -0.02em;
 }
 
 .nav-links {
   display: flex;
-  gap: 0.9rem;
+  gap: 1.1rem;
   overflow-x: auto;
   font-size: 0.92rem;
   font-weight: 600;
-  color: var(--green-900);
+  color: var(--slate-700);
   scrollbar-width: none;
 }
 
 .nav-links a {
   padding: 0.35rem 0.15rem;
   border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .nav-links a:hover,
 .nav-links a:focus-visible {
+  color: var(--green-700);
   border-color: var(--green-700);
 }
 
@@ -89,13 +121,15 @@ a {
 }
 
 .nav-auth {
-  padding: 0.45rem 0.9rem;
+  padding: 0.45rem 1rem;
   border: 1px solid var(--green-700);
   border-radius: 999px;
-  color: var(--green-900);
+  background: white;
+  color: var(--green-800);
   font-size: 0.85rem;
   font-weight: 700;
   white-space: nowrap;
+  transition: all 0.15s ease;
 }
 
 .nav-auth:hover,
@@ -160,8 +194,8 @@ h3 {
 
 .button {
   display: inline-flex;
-  min-height: 46px;
-  padding: 0.7rem 1.1rem;
+  min-height: 44px;
+  padding: 0.65rem 1.25rem;
   align-items: center;
   justify-content: center;
   border: 0;
@@ -171,10 +205,18 @@ h3 {
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s ease;
 }
 
 .button:hover:not(:disabled) {
-  background: var(--green-900);
+  background: var(--green-800);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(21, 128, 61, 0.2);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .button:disabled,
@@ -184,19 +226,22 @@ h3 {
 }
 
 .button-secondary {
-  border: 1px solid var(--border);
-  background: var(--paper);
-  color: var(--green-900);
+  border: 1px solid var(--slate-300);
+  background: #ffffff;
+  color: var(--slate-800);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .button-secondary:hover:not(:disabled) {
-  background: var(--green-100);
+  background: var(--slate-50);
+  border-color: var(--slate-400);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
 }
 
 .feature-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.9rem;
+  gap: 1rem;
 }
 
 .card,
@@ -209,37 +254,55 @@ h3 {
 }
 
 .card {
-  padding: 1.15rem;
-  transition: transform 160ms ease, border-color 160ms ease;
+  padding: 1.25rem;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .card:hover {
-  border-color: var(--green-700);
+  border-color: var(--green-600);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 0.4rem;
+  color: var(--green-900);
+  font-size: 1.15rem;
 }
 
 .card p,
 .muted {
   color: var(--muted);
+  line-height: 1.5;
 }
 
 .panel {
   display: grid;
   gap: 1rem;
   margin-top: 1.5rem;
-  padding: 1.15rem;
+  padding: 1.25rem;
 }
 
 .notice {
   margin-top: 1.5rem;
-  padding: 1rem 1.15rem;
-  border-left: 5px solid var(--gold);
+  padding: 1.1rem 1.25rem;
+  border-left: 4px solid var(--amber-500);
+  background: #fffbeb;
   box-shadow: none;
 }
 
 .notice h2 {
-  font-size: 1.05rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--amber-600);
   margin-bottom: 0.35rem;
+}
+
+.notice p {
+  color: var(--slate-700);
+  font-size: 0.9rem;
+  margin: 0;
 }
 
 .page-heading {
@@ -248,22 +311,42 @@ h3 {
 
 .page-heading h1 {
   max-width: none;
-  font-size: clamp(1.8rem, 6vw, 3rem);
+  font-size: clamp(1.8rem, 6vw, 2.75rem);
+  letter-spacing: -0.03em;
+  color: var(--slate-900);
+}
+
+.page-heading p {
+  color: var(--slate-600);
+  font-size: 1.05rem;
+  margin-top: 0.35rem;
 }
 
 label {
-  font-weight: 700;
-  color: var(--green-900);
+  font-weight: 600;
+  color: var(--slate-800);
+  font-size: 0.92rem;
 }
 
 textarea,
-input[type="file"] {
+input[type="file"],
+input[type="text"],
+select {
   width: 100%;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   background: white;
   color: var(--ink);
   font: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+textarea:focus,
+input[type="text"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--green-600);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
 }
 
 textarea {
@@ -275,10 +358,10 @@ textarea {
 .upload-box {
   display: grid;
   gap: 0.65rem;
-  padding: 1rem;
-  border: 1.5px dashed var(--green-700);
+  padding: 1.25rem;
+  border: 1.5px dashed var(--green-600);
   border-radius: var(--radius);
-  background: var(--green-100);
+  background: var(--green-50);
 }
 
 .upload-box input {
@@ -293,14 +376,20 @@ textarea {
 }
 
 .voice-button {
-  min-height: 46px;
-  padding: 0.7rem 1.1rem;
-  border: 1px solid var(--green-700);
+  min-height: 44px;
+  padding: 0.65rem 1.15rem;
+  border: 1px solid var(--green-600);
   border-radius: 999px;
-  background: var(--green-100);
+  background: var(--green-50);
   color: var(--green-900);
   font: inherit;
   font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.voice-button:hover:not(:disabled) {
+  background: var(--green-100);
 }
 
 .composer {
@@ -310,9 +399,11 @@ textarea {
 }
 
 .chat-bubble {
-  max-width: 90%;
-  padding: 0.8rem 1rem;
+  max-width: 88%;
+  padding: 0.85rem 1.15rem;
   border-radius: 16px;
+  line-height: 1.55;
+  font-size: 0.95rem;
 }
 
 .chat-bubble p {
@@ -323,22 +414,28 @@ textarea {
   justify-self: end;
   background: var(--green-700);
   color: white;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 6px rgba(21, 128, 61, 0.2);
 }
 
 .chat-bubble-farmer .chat-role {
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .chat-bubble-assistant {
   justify-self: start;
   border: 1px solid var(--border);
   background: white;
+  color: var(--slate-900);
+  border-bottom-left-radius: 4px;
+  box-shadow: var(--shadow);
 }
 
 .chat-role {
-  color: var(--muted);
-  font-size: 0.75rem;
+  color: var(--slate-500);
+  font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 

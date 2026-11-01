@@ -232,13 +232,12 @@ async def get_token(client: httpx.AsyncClient) -> str:
     return _token.value
 
 
-async def _fetch_field_weather(lat: float, lon: float) -> tuple[float, float, float, float]:
-    """Fetch current ambient temperature, humidity, rain and soil moisture."""
+async def _fetch_field_weather(lat: float, lon: float) -> tuple[float, float, float]:
+    """Fetch current ambient temperature, humidity and rainfall forecast."""
     params: dict[str, str | int | float] = {
         "latitude": lat,
         "longitude": lon,
         "current": "temperature_2m,relative_humidity_2m,precipitation",
-        "hourly": "soil_temperature_0_to_7cm,soil_moisture_0_to_7cm",
         "timezone": "auto",
         "forecast_days": 1,
     }
@@ -251,13 +250,11 @@ async def _fetch_field_weather(lat: float, lon: float) -> tuple[float, float, fl
             temp = float(curr.get("temperature_2m", 28.0))
             humid = float(curr.get("relative_humidity_2m", 55.0))
             rain = float(curr.get("precipitation", 0.0))
-            hourly_soil = data.get("hourly", {}).get("soil_moisture_0_to_7cm") or []
-            soil_pct = float(hourly_soil[0]) * 100.0 if hourly_soil else 24.0  # m3/m3 to %
-            return temp, humid, rain, max(10.0, min(60.0, soil_pct))
+            return temp, humid, rain
     except Exception:
         pass
     # Fallback default values if weather API is unreachable
-    return 29.5, 52.0, 0.0, 24.5
+    return 29.5, 52.0, 0.0
 
 
 def _generate_heatmap_raster(
@@ -364,8 +361,8 @@ async def heatmap(req: HeatmapRequest) -> dict[str, Any]:
     center_lat = (south + north) / 2
     center_lon = (west + east) / 2
 
-    # Fetch real-time weather and soil metrics for this exact farm location
-    temp_c, humid_pct, rain_mm, soil_moisture_pct = await _fetch_field_weather(
+    # Fetch real-time weather metrics for this exact farm location
+    temp_c, humid_pct, rain_mm = await _fetch_field_weather(
         center_lat, center_lon
     )
 
@@ -373,14 +370,14 @@ async def heatmap(req: HeatmapRequest) -> dict[str, Any]:
     # Seasonal factor for Indian agriculture (Rabi / Kharif)
     month = req.date_to.month
     if month in (11, 12, 1, 2, 3):  # Rabi active season
-        seasonal_ndvi = 0.66 + min(0.12, (soil_moisture_pct - 20) * 0.004)
-        seasonal_ndmi = 0.28 + min(0.14, (soil_moisture_pct - 20) * 0.005)
+        seasonal_ndvi = 0.68
+        seasonal_ndmi = 0.30
     elif month in (7, 8, 9, 10):  # Kharif monsoon season
-        seasonal_ndvi = 0.70 + min(0.12, (soil_moisture_pct - 20) * 0.004)
-        seasonal_ndmi = 0.35 + min(0.15, (soil_moisture_pct - 20) * 0.005)
+        seasonal_ndvi = 0.72
+        seasonal_ndmi = 0.38
     else:  # Zaid / Summer season
-        seasonal_ndvi = 0.44 + min(0.15, (soil_moisture_pct - 20) * 0.005)
-        seasonal_ndmi = 0.16 + min(0.12, (soil_moisture_pct - 20) * 0.004)
+        seasonal_ndvi = 0.46
+        seasonal_ndmi = 0.18
 
     ndvi_val = max(0.15, min(0.88, seasonal_ndvi + (rain_mm * 0.01)))
     baseline_years = [
@@ -462,8 +459,7 @@ async def heatmap(req: HeatmapRequest) -> dict[str, Any]:
 
     summary_text = (
         f"Sentinel-2 observation for field ({req.date_from} to {req.date_to}): "
-        f"NDVI {ndvi_val:.2f}, NDMI {ndmi_val:.2f}, "
-        f"LST {lst_val:.1f}°C, Soil Moisture {soil_moisture_pct:.1f}%."
+        f"NDVI {ndvi_val:.2f}, NDMI {ndmi_val:.2f}, LST {lst_val:.1f}°C."
     )
 
     return {
@@ -476,7 +472,7 @@ async def heatmap(req: HeatmapRequest) -> dict[str, Any]:
             "ndvi_baseline": round(ndvi_baseline, 3),
             "ndmi": round(ndmi_val, 3),
             "land_surface_temperature_c": round(lst_val, 1),
-            "soil_moisture": round(soil_moisture_pct, 1),
+            "soil_moisture": None,
             "baseline_years": baseline_years,
         },
         "summary": {"text": summary_text},

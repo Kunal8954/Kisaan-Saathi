@@ -48,7 +48,8 @@ class GroqProvider(LLMProvider):
 
         body = response.json()
         choices = body.get("choices")
-        content = choices[0].get("message", {}).get("content") if choices else None
+        msg = choices[0].get("message", {}) if choices else {}
+        content = msg.get("content") or msg.get("reasoning")
         if not content:
             raise RuntimeError("Groq returned no generated content.")
 

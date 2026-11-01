@@ -24,6 +24,7 @@ interface ChatResponsePayload {
 }
 
 const AGENT_LABELS_HI: Record<string, string> = {
+  general_assistant: "🌾 किसान साथी सलाहकार",
   treatment_agent: "🛡️ फसल उपचार विशेषज्ञ",
   fertilizer_agent: "🌾 खाद व पोषण विशेषज्ञ",
   disease_doctor: "🔬 फसल रोग डॉक्टर",
@@ -32,6 +33,7 @@ const AGENT_LABELS_HI: Record<string, string> = {
 };
 
 const AGENT_LABELS_EN: Record<string, string> = {
+  general_assistant: "🌾 Kisan Saathi Advisor",
   treatment_agent: "🛡️ Treatment & IPM Specialist",
   fertilizer_agent: "🌾 Fertilizer & Nutrition Agent",
   disease_doctor: "🔬 Disease Doctor",
@@ -71,7 +73,7 @@ export default function ChatPage() {
         id: "initial-greeting",
         role: "assistant",
         text: t.chat.greeting,
-        agent: "disease_doctor",
+        agent: "general_assistant",
       },
     ]);
   }, [t.chat.greeting]);
@@ -152,6 +154,7 @@ export default function ChatPage() {
         id: "initial-greeting",
         role: "assistant",
         text: t.chat.greeting,
+        agent: "general_assistant",
       },
     ]);
     setError(null);

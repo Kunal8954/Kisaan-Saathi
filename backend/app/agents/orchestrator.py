@@ -214,16 +214,26 @@ async def run_chat(request: ChatRequest) -> ChatResponse:
     # Format reply based on agent result
     reply = ""
     sources = list(result_state.sources)
+    is_en = request.language == "en"
+
     if "general_reply" in result_state.result:
         reply = str(result_state.result["general_reply"])
     elif "fertilizer_plan" in result_state.result:
         plan = result_state.result["fertilizer_plan"]
-        crop_title = plan.get("crop", "फसल")
+        crop_title = plan.get("crop", "Crop" if is_en else "फसल")
         basal_str = " ".join(plan.get("basal_dose", []))
         top_str = " ".join(plan.get("top_dressing_stages", []))
         adv_text = result_state.result.get("fertilizer_advisory_text")
         if adv_text:
             reply = adv_text
+        elif is_en:
+            npk = plan.get("recommended_npk_ratio")
+            reply = (
+                f"{crop_title} Nutrition Advisory (NPK Ratio: {npk}):\n\n"
+                f"• Basal Application: {basal_str}\n"
+                f"• Top-Dressing Schedule: {top_str}\n\n"
+                f"Advisory Note: {plan.get('soil_testing_advisory')}"
+            )
         else:
             reply = (
                 f"{crop_title} पोषण परामर्श (NPK: {plan.get('recommended_npk_ratio')}):\n\n"
@@ -239,6 +249,15 @@ async def run_chat(request: ChatRequest) -> ChatResponse:
         adv_text = result_state.result.get("treatment_advisory_text")
         if adv_text:
             reply = adv_text
+        elif is_en:
+            reply = (
+                f"{t_plan.get('target_condition')} IPM Treatment Strategy:\n\n"
+                f"1. Immediate Actions: {imm_str}\n"
+                f"2. Organic / Biological Control: {org_str}\n"
+                f"3. Chemical Protection: {chem_str}\n\n"
+                f"Safety Precautions (PHI: {t_plan.get('pre_harvest_interval_days')} days): "
+                f"{t_plan.get('disclaimer')}"
+            )
         else:
             reply = (
                 f"{t_plan.get('target_condition')} उपचार योजना:\n\n"
@@ -250,23 +269,30 @@ async def run_chat(request: ChatRequest) -> ChatResponse:
             )
     elif "diagnosis" in result_state.result:
         diag = result_state.result["diagnosis"]
-        likely = diag.get("likely_cause", "रोग")
+        likely = diag.get("likely_cause", "Crop Issue" if is_en else "रोग")
         conf_pct = int(float(diag.get("confidence", 0.85)) * 100)
         remedies = diag.get("remedies", [])
         rem_lines = [f"• {r.get('title')}: {r.get('instructions')}" for r in remedies]
-        reply = (
-            f"संभावित समस्या: {likely} (सटीकता: {conf_pct}%)\n\n"
-            f"उपचार के उपाय:\n" + "\n".join(rem_lines) + "\n\n"
-            f"अस्वीकरण: {diag.get('disclaimer', '')}"
-        )
+        if is_en:
+            reply = (
+                f"Identified Issue: {likely} (Confidence: {conf_pct}%)\n\n"
+                f"Recommended Remedies:\n" + "\n".join(rem_lines) + "\n\n"
+                f"Disclaimer: {diag.get('disclaimer', '')}"
+            )
+        else:
+            reply = (
+                f"संभावित समस्या: {likely} (सटीकता: {conf_pct}%)\n\n"
+                f"उपचार के उपाय:\n" + "\n".join(rem_lines) + "\n\n"
+                f"अस्वीकरण: {diag.get('disclaimer', '')}"
+            )
     else:
         reply = (
-            "नमस्ते किसान साथी! अपनी फसल, कीट, रोग, खाद की मात्रा अथवा सरकारी "
-            "योजनाओं के बारे में पूछें।"
-            if request.language == "hi"
+            "Hello! Ask about your crops, pest symptoms, fertilizer schedules, "
+            "or government schemes."
+            if is_en
             else (
-                "Hello! Ask about your crops, pest symptoms, fertilizer schedules, "
-                "or government schemes."
+                "नमस्ते किसान साथी! अपनी फसल, कीट, रोग, खाद की मात्रा अथवा सरकारी "
+                "योजनाओं के बारे में पूछें।"
             )
         )
 
