@@ -15,8 +15,6 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from app.agents.state import AgentState
-from app.config import get_settings
-from app.llm.provider import LLMMessage, LLMRequest, MessageRole, get_llm_provider
 from app.models.farmer import Language
 
 
@@ -151,37 +149,6 @@ async def run(state: AgentState) -> AgentState:
     else:
         proto = _TREATMENT_PROTOCOLS["blight"]
 
-    settings = get_settings()
-    ai_guidance = None
-    if settings.groq_api_key:
-        try:
-            prompt = (
-                f"You are the senior crop protection pathologist. "
-                f"Crop: {crop}. Condition: {proto['title_en']}. "
-                "Provide an IPM treatment plan with immediate sanitation, biological control, "
-                "verified CIBRC chemical dosages, and Pre-Harvest Interval (PHI). "
-                f"Language: {'English' if is_en else 'Hindi'}."
-            )
-            llm = get_llm_provider()
-            resp = await llm.generate(
-                LLMRequest(
-                    messages=[
-                        LLMMessage(
-                            role=MessageRole.SYSTEM,
-                            content=(
-                                "You are an expert crop protection scientist. "
-                                "Provide safe, verified instructions."
-                            ),
-                        ),
-                        LLMMessage(role=MessageRole.USER, content=prompt),
-                    ],
-                    max_output_tokens=600,
-                )
-            )
-            ai_guidance = resp.text
-        except Exception:
-            ai_guidance = None
-
     disclaimer = (
         "Consult your local Krishi Vigyan Kendra (KVK) or agricultural officer "
         "before chemical spraying."
@@ -203,7 +170,5 @@ async def run(state: AgentState) -> AgentState:
     )
 
     state.result["treatment_plan"] = plan.model_dump(mode="json")
-    if ai_guidance:
-        state.result["treatment_advisory_text"] = ai_guidance
     state.sources.extend(plan.sources)
     return state

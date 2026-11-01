@@ -23,9 +23,20 @@ async def retrieve(
 ) -> list[RetrievedDocument]:
     """Embed a query and run Atlas Vector Search over scheme/crop chunks."""
 
-    # TODO: call EmbeddingService, build the $vectorSearch stage, and rerank results.
-    _ = (query, top_k, filters)
-    raise NotImplementedError("Vector retrieval is not implemented yet.")
+    if not query.strip():
+        raise ValueError("query must not be empty.")
+    if top_k < 1:
+        raise ValueError("top_k must be greater than zero.")
+    from app.rag.meko import MekoClient
+
+    documents = await MekoClient().search(query, top_k=top_k)
+    if not filters:
+        return documents
+    return [
+        document
+        for document in documents
+        if all(document.metadata.get(key) == value for key, value in filters.items())
+    ]
 
 
 async def retrieve_for_scheme(
@@ -36,6 +47,5 @@ async def retrieve_for_scheme(
 ) -> list[RetrievedDocument]:
     """Retrieve scheme passages with optional state and crop filters."""
 
-    # TODO: construct metadata filters for state/crop and call retrieve().
-    _ = (question, state, crop, top_k)
-    raise NotImplementedError("Scheme retrieval is not implemented yet.")
+    filters = {key: value for key, value in {"state": state, "crop": crop}.items() if value}
+    return await retrieve(question, top_k=top_k, filters=filters or None)

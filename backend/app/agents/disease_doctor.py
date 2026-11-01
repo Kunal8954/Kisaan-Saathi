@@ -153,8 +153,26 @@ async def diagnose_image(
     lang = Language.ENGLISH if language.lower().startswith("en") else Language.HINDI
     disclaimer = KVK_DISCLAIMER_EN if lang == Language.ENGLISH else KVK_DISCLAIMER_HI
 
-    # 1. Try Groq Multimodal Vision if key is configured
-    if settings.groq_api_key:
+    retrieved_context = ""
+    retrieved_sources: list[str] = []
+    if settings.meko_api_key:
+        from app.rag.meko import MekoClient
+
+        documents = await MekoClient().search(
+            f"{crop or 'crop'} disease symptoms and safe treatment {symptom_hints}",
+            top_k=5,
+        )
+        retrieved_sources = [document.source for document in documents]
+        retrieved_context = "\n\n".join(
+            f"[{document.document_id}] {document.text}" for document in documents
+        )
+
+    # Photo diagnosis must use a real multimodal provider and retrieved evidence.
+    if image:
+        if not settings.groq_api_key:
+            raise RuntimeError("GROQ_API_KEY is required for photo diagnosis.")
+        if not retrieved_sources:
+            raise RuntimeError("MEKO_API_KEY is required for grounded photo diagnosis.")
         try:
             data_url = f"data:{mime_type};base64,{base64.b64encode(image).decode('ascii')}"
             prompt = (
@@ -164,7 +182,15 @@ async def diagnose_image(
                 "confidence (float 0.1 to 0.99), symptoms (list of strings), and "
                 "remedies (list with exactly two items: one with remedy_type='chemical_fertilizer' "
                 "and one with remedy_type='organic_cow_dung'). "
-                f"Language: {language}. Crop: {crop or 'detect from photo'}."
+                f"Language: {language}. Crop: {crop or 'detect from photo'}. "
+                "Do not invent a diagnosis. If the image is unclear, set "
+                "cause_category to 'unknown', confidence below 0.4, and explain "
+                "what additional evidence is needed."
+            )
+            prompt += (
+                "\n\nUse these retrieved agronomy passages only as supporting evidence. "
+                "Do not treat them as proof that the pictured plant has that disease:\n"
+                + retrieved_context
             )
             response = await get_llm_provider().generate_multimodal(
                 LLMRequest(
@@ -221,14 +247,14 @@ async def diagnose_image(
                         remedy_type=RemedyType.CHEMICAL_FERTILIZER,
                         title=str(chem_rem.get("title", "Chemical Remedy")),
                         instructions=str(chem_rem.get("instructions", "Apply as directed.")),
-                        source_ids=["ICAR-CPRI-2024", "CIBRC-Approved-Schedule"],
+                        source_ids=retrieved_sources[:2],
                         safety_notes=str(chem_rem.get("safety_notes", "Wear gloves and mask.")),
                     ),
                     Remedy(
                         remedy_type=RemedyType.ORGANIC_COW_DUNG,
                         title=str(org_rem.get("title", "Organic & Bio-Control Remedy")),
                         instructions=str(org_rem.get("instructions", "Apply organic spray.")),
-                        source_ids=["NCOF-Organic-Advisory-2024"],
+                        source_ids=retrieved_sources[:2],
                         safety_notes=str(
                             org_rem.get("safety_notes", "Safe for beneficial insects.")
                         ),
@@ -245,12 +271,11 @@ async def diagnose_image(
                     cause_category=cause_cat,
                     confidence=conf,
                     remedies=remedies,
-                    sources=["ICAR Crop Protection Handbook 2024", "CIBRC Registered Formulations"],
+                    sources=retrieved_sources,
                     disclaimer=disclaimer,
                 )
-        except Exception:
-            # Fall back safely to catalog grounding if Groq API has connectivity issues
-            pass
+        except (RuntimeError, ValueError, json.JSONDecodeError) as exc:
+            raise RuntimeError(f"Photo diagnosis failed: {exc}") from exc
 
     # 2. Grounded Agronomy Catalog Retrieval
     active_hints = symptom_hints.strip() if symptom_hints.strip() else (crop or "")
@@ -350,10 +375,8 @@ async def run(state: AgentState) -> AgentState:
             header, b64_part = raw_img.split(",", 1)
             mime_type = header.split(";")[0].replace("data:", "")
             image_bytes = base64.b64decode(b64_part)
-        except Exception:
-            image_bytes = b"sample_crop_image_bytes"
-    else:
-        image_bytes = b"mock_crop_image_bytes"
+        except (ValueError, IndexError, base64.binascii.Error) as exc:
+            raise ValueError("Uploaded crop image could not be decoded.") from exc
 
     diagnosis = await diagnose_image(
         image=image_bytes,

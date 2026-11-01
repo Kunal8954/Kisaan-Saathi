@@ -1,9 +1,11 @@
 """Tests for the crop disease diagnosis route and safety contract."""
 
 import io
+from types import SimpleNamespace
 
 from fastapi.testclient import TestClient
 
+from app.agents import disease_doctor
 from app.main import app
 
 client = TestClient(app)
@@ -17,8 +19,13 @@ DUMMY_JPEG = (
 )
 
 
-def test_diagnose_crop_success() -> None:
-    """A valid image returns 200 and a full DiagnosisResult conforming to safety rules."""
+def test_diagnose_requires_grounding_configuration(monkeypatch) -> None:
+    """An image must not receive a fabricated diagnosis without provider/RAG credentials."""
+    monkeypatch.setattr(
+        disease_doctor,
+        "get_settings",
+        lambda: SimpleNamespace(groq_api_key="", meko_api_key=""),
+    )
     response = client.post(
         "/api/diagnose",
         files={"file": ("wheat_rust.jpg", io.BytesIO(DUMMY_JPEG), "image/jpeg")},
@@ -30,24 +37,8 @@ def test_diagnose_crop_success() -> None:
         },
     )
 
-    assert response.status_code == 200
-    data = response.json()
-
-    assert data["crop"] == "wheat"
-    assert "likely_cause" in data
-    assert 0.0 <= data["confidence"] <= 1.0
-    assert "KVK" in data["disclaimer"] or "कृषि विज्ञान केंद्र" in data["disclaimer"]
-    assert len(data["sources"]) >= 1
-
-    # Safety contract: exactly two remedies, one chemical, one organic
-    remedies = data["remedies"]
-    assert len(remedies) == 2
-    types = {r["remedy_type"] for r in remedies}
-    assert types == {"chemical_fertilizer", "organic_cow_dung"}
-    for remedy in remedies:
-        assert len(remedy["title"]) > 0
-        assert len(remedy["instructions"]) > 0
-        assert len(remedy["source_ids"]) >= 1
+    assert response.status_code == 503
+    assert "required" in response.json()["detail"].lower()
 
 
 def test_diagnose_rejects_non_image() -> None:
@@ -62,14 +53,18 @@ def test_diagnose_rejects_non_image() -> None:
     assert "image" in response.json()["detail"].lower()
 
 
-def test_diagnose_supports_english_language() -> None:
-    """English language returns English disclaimer and remedy text."""
+def test_diagnose_does_not_fabricate_english_result(monkeypatch) -> None:
+    """English image requests also fail explicitly when grounding is unavailable."""
+    monkeypatch.setattr(
+        disease_doctor,
+        "get_settings",
+        lambda: SimpleNamespace(groq_api_key="", meko_api_key=""),
+    )
     response = client.post(
         "/api/diagnose",
         files={"file": ("rice_leaf.png", io.BytesIO(DUMMY_JPEG), "image/png")},
         data={"crop": "rice", "language": "en"},
     )
 
-    assert response.status_code == 200
-    data = response.json()
-    assert "Krishi Vigyan Kendra" in data["disclaimer"]
+    assert response.status_code == 503
+    assert "required" in response.json()["detail"].lower()

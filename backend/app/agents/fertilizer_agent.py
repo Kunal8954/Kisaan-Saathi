@@ -12,8 +12,6 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from app.agents.state import AgentState
-from app.config import get_settings
-from app.llm.provider import LLMMessage, LLMRequest, MessageRole, get_llm_provider
 from app.models.farmer import Language
 
 
@@ -151,41 +149,6 @@ async def run(state: AgentState) -> AgentState:
         matched_key = "wheat"
 
     bench = _NUTRITION_BENCHMARKS[matched_key]
-    settings = get_settings()
-
-    # Try LLM synthesis if Groq is available
-    if settings.groq_api_key:
-        try:
-            prompt = (
-                f"You are the senior ICAR fertilizer specialist. "
-                f"Crop: {matched_key}. Farmer query: {query}. "
-                "Provide a balanced NPK, micronutrient (Zinc, Sulphur), "
-                "and bio-fertilizer schedule. "
-                "Emphasize soil testing before high nitrogen application. "
-                f"Language: {'English' if is_en else 'Hindi'}."
-            )
-            llm = get_llm_provider()
-            resp = await llm.generate(
-                LLMRequest(
-                    messages=[
-                        LLMMessage(
-                            role=MessageRole.SYSTEM,
-                            content=(
-                                "You are an agricultural soil and nutrient advisor. "
-                                "Respond practically."
-                            ),
-                        ),
-                        LLMMessage(role=MessageRole.USER, content=prompt),
-                    ],
-                    max_output_tokens=600,
-                )
-            )
-            ai_text = resp.text
-        except Exception:
-            ai_text = None
-    else:
-        ai_text = None
-
     basal = bench["basal_en"] if is_en else bench["basal_hi"]
     top_dressing = bench["top_dressing_en"] if is_en else bench["top_dressing_hi"]
     organic = bench["organic_en"] if is_en else bench["organic_hi"]
@@ -219,7 +182,5 @@ async def run(state: AgentState) -> AgentState:
     )
 
     state.result["fertilizer_plan"] = plan.model_dump(mode="json")
-    if ai_text:
-        state.result["fertilizer_advisory_text"] = ai_text
     state.sources.extend(plan.sources)
     return state

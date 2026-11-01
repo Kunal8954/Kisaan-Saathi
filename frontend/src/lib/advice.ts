@@ -286,5 +286,13 @@ export async function getFieldAdvice(
     }
   }
 
-  return samples[locale][issue.key];
+  return {
+    summary:
+      locale === "hi"
+        ? "सत्यापित सलाह उपलब्ध नहीं है। कृपया सर्वर कनेक्शन और कॉन्फ़िगरेशन जाँचें।"
+        : "Verified advice is unavailable. Check the server connection and configuration.",
+    pros: [],
+    cons: [],
+    sample: false,
+  };
 }

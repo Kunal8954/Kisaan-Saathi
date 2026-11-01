@@ -167,9 +167,7 @@ export function FieldAdvisory({
             <div>
               <dt>{locale === "hi" ? "बारिश की संभावना" : "Rain Possibility"}</dt>
               <dd style={{ color: "#0284c7" }}>
-                {current?.precipitation_probability_pct !== null && current?.precipitation_probability_pct !== undefined
-                  ? `${current.precipitation_probability_pct}%`
-                  : `${formatNumber(current?.precipitation_mm, 1, " mm")}`}
+                {formatNumber(current?.precipitation_mm, 1, " mm")}
               </dd>
             </div>
           </dl>

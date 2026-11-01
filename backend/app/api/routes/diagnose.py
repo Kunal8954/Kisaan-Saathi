@@ -92,7 +92,13 @@ async def diagnose_crop(
         },
     )
 
-    result_state = await disease_doctor.run(state)
+    try:
+        result_state = await disease_doctor.run(state)
+    except (RuntimeError, ValueError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
     diagnosis_data = result_state.result.get("diagnosis")
 
     if not diagnosis_data:

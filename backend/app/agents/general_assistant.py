@@ -83,20 +83,32 @@ async def run(state: AgentState) -> AgentState:
     if is_weather_query:
         try:
             from app.tools.weather import get_weather_rag_context
-            lat = float(state.context.get("latitude") or state.context.get("lat") or 29.6857)
-            lon = float(state.context.get("longitude") or state.context.get("lon") or 76.9905)
-            loc_name = str(
-                state.context.get("location_name")
-                or ("Karnal / North India" if is_en else "करनाल / उत्तर भारत")
-            )
+            latitude = state.context.get("latitude") or state.context.get("lat")
+            longitude = state.context.get("longitude") or state.context.get("lon")
+            if latitude is None or longitude is None:
+                raise ValueError("Location is required for a weather question.")
+            lat = float(latitude)
+            lon = float(longitude)
+            loc_name = str(state.context.get("location_name") or "")
             weather_context = await get_weather_rag_context(
                 lat=lat,
                 lon=lon,
                 location_name=loc_name,
                 language="en" if is_en else "hi",
             )
-        except Exception:
-            pass
+        except (ValueError, RuntimeError):
+            weather_context = ""
+
+    rag_context = ""
+    rag_sources: list[str] = []
+    if settings.meko_api_key and not is_greeting:
+        from app.rag.meko import MekoClient
+
+        documents = await MekoClient().search(state.message, top_k=5)
+        rag_sources = [document.source for document in documents]
+        rag_context = "\n\n".join(
+            f"[{document.document_id}] {document.text}" for document in documents
+        )
 
     # 1. If LLM provider (Groq or Gemini) is available, use generative answer
     if settings.groq_api_key or settings.google_cloud_project:
@@ -124,6 +136,13 @@ async def run(state: AgentState) -> AgentState:
                     f"Respond in {'English' if is_en else 'Hindi'}. "
                     "Keep your response clear, structured, and farmer-friendly."
                 )
+            if rag_context:
+                system_prompt += (
+                    "\nUse only the following retrieved agronomy evidence for factual claims. "
+                    "If it does not answer the question, say that verified evidence is "
+                    "unavailable rather than guessing. Cite the evidence IDs.\n\n"
+                    + rag_context
+                )
             response = await llm.generate(
                 LLMRequest(
                     messages=[
@@ -138,35 +157,38 @@ async def run(state: AgentState) -> AgentState:
                 state.result["general_reply"] = response.text.strip()
                 if is_weather_query:
                     state.sources.append("OpenWeatherMap Live Telemetry")
+                state.sources.extend(rag_sources)
                 state.sources.append("ICAR Package of Practices & Agricultural Extension")
                 return state
-        except Exception:
-            pass
+        except (RuntimeError, ValueError):
+            state.result["general_reply"] = (
+                "I could not get a verified answer from the configured AI provider. "
+                "Please check the server configuration and try again."
+                if is_en
+                else "कॉन्फ़िगर किए गए AI प्रदाता से सत्यापित उत्तर नहीं मिल सका। "
+                "सर्वर कॉन्फ़िगरेशन जाँचकर फिर प्रयास करें।"
+            )
+            state.sources.append("No verified source available")
+            return state
 
     # 2. Grounded deterministic offline fallbacks
     if is_greeting:
         state.result["general_reply"] = DEFAULT_GREETING_EN if is_en else DEFAULT_GREETING_HI
-    elif is_weather_query and weather_context:
-        state.result["general_reply"] = weather_context
-        state.sources.append("OpenWeatherMap Live Telemetry")
-        return state
-    elif is_crop_plan:
+    elif is_weather_query:
         state.result["general_reply"] = (
-            CROP_SEASON_GUIDANCE_EN if is_en else CROP_SEASON_GUIDANCE_HI
+            "Please share your farm location so I can retrieve live weather data."
+            if is_en
+            else "लाइव मौसम की जानकारी के लिए अपने खेत का स्थान साझा करें।"
         )
+        state.sources.append("No weather telemetry requested")
+        return state
     else:
         state.result["general_reply"] = (
-            (
-                f"Thank you for contacting Kisan Saathi. Regarding '{state.message}': "
-                "Please specify your crop (e.g. Wheat, Rice, Mustard) and what you need "
-                "assistance with (pest/disease treatment, fertilizer doses, or schemes)."
-            )
+            "No verified answer is available for this question because the AI/RAG "
+            "provider is not configured."
             if is_en
-            else (
-                f"किसान साथी में आपका स्वागत है। आपके सवाल '{state.message}' के संदर्भ में: "
-                "कृपया अपनी फसल का नाम (जैसे गेहूं, धान, सरसों, आलू) और आवश्यक विषय "
-                "(कीट/रोग उपचार, खाद की मात्रा, या सरकारी योजनाएं) बताएं।"
-            )
+            else "इस प्रश्न के लिए सत्यापित उत्तर उपलब्ध नहीं है क्योंकि AI/RAG "
+            "प्रदाता कॉन्फ़िगर नहीं है।"
         )
 
     state.sources.append("ICAR Farmer Advisory Guidelines")

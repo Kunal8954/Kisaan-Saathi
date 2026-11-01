@@ -209,13 +209,27 @@ async def run_chat(request: ChatRequest) -> ChatResponse:
     )
 
     handler = AGENT_NODES.get(node_name, general_assistant.run)
-    result_state = await handler(state)
+    is_en = request.language == "en"
+    try:
+        result_state = await handler(state)
+    except (RuntimeError, ValueError) as exc:
+        return ChatResponse(
+            reply=(
+                "I could not produce a verified answer because a required service "
+                "is unavailable. Please check the server configuration and try again."
+                if is_en
+                else "आवश्यक सेवा उपलब्ध नहीं होने के कारण सत्यापित उत्तर नहीं मिल सका। "
+                "सर्वर कॉन्फ़िगरेशन जाँचकर फिर प्रयास करें।"
+            ),
+            intent=str(intent),
+            agent=node_name,
+            sources=["No verified answer available"],
+            metadata={"error": str(exc)},
+        )
 
     # Format reply based on agent result
     reply = ""
     sources = list(result_state.sources)
-    is_en = request.language == "en"
-
     if "general_reply" in result_state.result:
         reply = str(result_state.result["general_reply"])
     elif "fertilizer_plan" in result_state.result:

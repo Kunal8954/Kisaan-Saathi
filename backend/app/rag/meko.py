@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
+from uuid import uuid4
 
 import httpx
 
@@ -95,6 +96,7 @@ class MekoClient:
                 "name": "knowledgebase_search",
                 "arguments": {
                     "query": query,
+                    "conversation_id": str(uuid4()),
                     "datapack_id": datapack_id,
                     "limit": top_k,
                 },
@@ -165,12 +167,15 @@ def _normalize_hits(payload: dict[str, Any], top_k: int) -> list[RetrievedDocume
         candidates = result.get("results", [])
     documents: list[RetrievedDocument] = []
     for index, hit in enumerate(candidates[:top_k]):
-        if not isinstance(hit, dict) or not hit.get("text"):
+        if not isinstance(hit, dict):
+            continue
+        text = hit.get("text") or hit.get("chunk_text")
+        if not text:
             continue
         identifier = str(hit.get("id") or hit.get("document_id") or f"meko-{index}")
-        raw_score = hit.get("score")
+        raw_score = hit.get("rerank_score") or hit.get("score")
         if raw_score is None:
-            raw_score = hit.get("similarity", 0.0)
+            raw_score = hit.get("similarity") or hit.get("distance", 0.0)
         try:
             score_val = float(raw_score)
         except (TypeError, ValueError):
@@ -180,7 +185,7 @@ def _normalize_hits(payload: dict[str, Any], top_k: int) -> list[RetrievedDocume
             RetrievedDocument(
                 document_id=identifier,
                 chunk_id=identifier,
-                text=str(hit["text"]),
+                text=str(text),
                 source=str(hit.get("source") or hit.get("document_name") or identifier),
                 score=score_val,
                 metadata=hit,

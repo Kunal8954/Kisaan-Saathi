@@ -39,12 +39,7 @@ export default function TasksPage() {
   const { locale } = useI18n();
   const isHi = locale === "hi";
 
-  // Location coordinates (Default: Karnal, Haryana - Indian Agricultural Hub)
-  const [coords, setCoords] = useState<{ lat: number; lon: number; name: string }>({
-    lat: 29.6857,
-    lon: 76.9905,
-    name: "करनाल, हरियाणा (Karnal)",
-  });
+  const [coords, setCoords] = useState<{ lat: number; lon: number; name: string } | null>(null);
 
   // Weather state
   const [weather, setWeather] = useState<WeatherResult | null>(null);
@@ -55,16 +50,12 @@ export default function TasksPage() {
   const [filter, setFilter] = useState<"all" | "urgent" | "today" | "completed">("all");
 
   // Generator form state
-  const [selectedCrop, setSelectedCrop] = useState<string>("wheat");
-  const [sowingDate, setSowingDate] = useState<string>(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 20); // Default to 20 days ago
-    return d.toISOString().slice(0, 10);
-  });
+  const [selectedCrop, setSelectedCrop] = useState<string>("");
+  const [sowingDate, setSowingDate] = useState<string>("");
 
   // Custom task form state
   const [customTitle, setCustomTitle] = useState<string>("");
-  const [customDate, setCustomDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
+  const [customDate, setCustomDate] = useState<string>("");
   const [, startTransition] = useTransition();
 
   // Load saved tasks on initial mount
@@ -72,18 +63,16 @@ export default function TasksPage() {
     const stored = loadFarmTasks();
     if (stored.length > 0) {
       setTasks(stored);
-    } else {
-      const initialSowing = new Date();
-      initialSowing.setDate(initialSowing.getDate() - 20);
-      const initial = generateTasksFromSowingDate("wheat", initialSowing.toISOString().slice(0, 10));
-      setTasks(initial);
-      saveFarmTasks(initial);
     }
   }, []);
 
   // Fetch live weather when coordinates change
   useEffect(() => {
     let active = true;
+    if (!coords) {
+      setWeatherLoading(false);
+      return;
+    }
     setWeatherLoading(true);
 
     fetchFieldWeather(coords.lat, coords.lon)
@@ -101,7 +90,7 @@ export default function TasksPage() {
     return () => {
       active = false;
     };
-  }, [coords.lat, coords.lon]);
+  }, [coords]);
 
   // Handle GPS location detection
   const handleDetectGps = () => {
@@ -216,7 +205,7 @@ export default function TasksPage() {
             title="Detect GPS location for weather"
           >
             <Compass size={16} />
-            <span>{coords.name}</span>
+            <span>{coords?.name ?? (isHi ? "लोकेशन उपलब्ध नहीं है" : "Location unavailable")}</span>
           </button>
         </div>
         <p>
