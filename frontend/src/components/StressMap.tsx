@@ -26,11 +26,12 @@ const StressMapInner = dynamic(
   }
 );
 
-const LAYERS: { id: HeatmapLayer; labelKey: "ndvi" | "anomaly" | "ndmi" | "lst" }[] = [
+const LAYERS: { id: HeatmapLayer; labelKey: "ndvi" | "anomaly" | "ndmi" | "lst" | "wind" }[] = [
   { id: "ndvi", labelKey: "ndvi" },
   { id: "ndvi_anomaly", labelKey: "anomaly" },
   { id: "ndmi", labelKey: "ndmi" },
   { id: "lst", labelKey: "lst" },
+  { id: "wind", labelKey: "wind" },
 ];
 
 function MapFallback() {
@@ -49,7 +50,7 @@ function daysAgo(days: number): string {
 }
 
 export function StressMap() {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const { user } = useAuth();
   const [fields, setFields] = useState<Field[]>([]);
   const [selectedFieldId, setSelectedFieldId] = useState<string>("");
@@ -397,25 +398,28 @@ export function StressMap() {
                 )}
               </dd>
             </div>
+            <div>
+              <dt>{t.stress.metricWind}</dt>
+              <dd style={{ color: "#0284c7" }}>
+                {result.metrics.wind_speed_kmh !== null && result.metrics.wind_speed_kmh !== undefined
+                  ? `${result.metrics.wind_speed_kmh.toFixed(1)} km/h`
+                  : t.stress.unavailable}
+                {result.metrics.wind_gust_kmh !== null && result.metrics.wind_gust_kmh !== undefined ? (
+                  <small style={{ display: "block", fontSize: "0.72rem", color: "#64748b" }}>
+                    झोंके (Gusts): {result.metrics.wind_gust_kmh.toFixed(1)} km/h
+                  </small>
+                ) : null}
+              </dd>
+            </div>
+            <div className={styles.stressMetricWide}>
+              <dt>{t.stress.metricSoil}</dt>
+              <dd style={{ color: "#166534" }}>
+                {result.metrics.soil_moisture !== null
+                  ? `${result.metrics.soil_moisture.toFixed(1)}%`
+                  : t.stress.unavailable}
+              </dd>
+            </div>
           </dl>
-
-          <p
-            style={{
-              margin: "0.85rem 0 0",
-              fontSize: "0.84rem",
-              color: "var(--muted, #64748b)",
-              lineHeight: 1.5,
-              background: "#f8fafc",
-              padding: "0.6rem 0.85rem",
-              borderRadius: "8px",
-              border: "1px solid #e2e8f0",
-            }}
-          >
-            🔬 <strong>{locale === "hi" ? "सटीक मिट्टी परीक्षण सलाह:" : "Accurate Soil Testing Note:"}</strong>{" "}
-            {locale === "hi"
-              ? "मिट्टी के रासायनिक पोषक तत्व (NPK, pH, कार्बन) सैटेलाइट से अनुमानित नहीं किए जा सकते। सटीक लैब जांच व सही खाद मात्रा के लिए 'मिट्टी' टैब में अपना मृदा स्वास्थ्य कार्ड (Soil Health Card) अपलोड करें।"
-              : "Chemical soil nutrients (NPK, pH, Organic Carbon) cannot be measured via satellite. For certified lab recommendations, upload your Soil Health Card in the Soil Analyst section."}
-          </p>
 
           <div
             style={{
@@ -484,8 +488,6 @@ export function StressMap() {
           metricsError={result ? null : error}
           latitude={selectedPoint.latitude}
           longitude={selectedPoint.longitude}
-          dateFrom={dateFrom}
-          dateTo={dateTo}
         />
       ) : null}
 

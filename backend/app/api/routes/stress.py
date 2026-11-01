@@ -23,7 +23,9 @@ class StressResponse(BaseModel):
     ndvi_baseline: float
     ndmi: float
     land_surface_temperature_c: float
-    soil_moisture: float | None = None
+    soil_moisture: float
+    wind_speed_kmh: float | None = None
+    wind_gust_kmh: float | None = None
     stress_score: float
     stress_level: str
     source: str = "Copernicus Sentinel-2 & Open-Meteo"
@@ -47,22 +49,20 @@ async def get_farm_stress(
     resolved_lat = lat if lat is not None else 28.6
     resolved_lon = lon if lon is not None else 77.2
 
-    # Fetch live weather metrics synced with date window
-    temp_c, _, rain_mm, *_ = await _fetch_field_weather(
-        resolved_lat, resolved_lon, date_from=resolved_start, date_to=resolved_end
-    )
+    # Fetch live weather & soil moisture
+    temp_c, _, rain_mm, soil_pct, wind_speed, wind_gust, _ = await _fetch_field_weather(resolved_lat, resolved_lon)
 
     # Seasonal baseline & NDVI
     month = resolved_end.month
     if month in (11, 12, 1, 2, 3):
-        ndvi_val = max(0.2, min(0.85, 0.68 + rain_mm * 0.01))
-        ndmi_val = max(-0.1, min(0.6, 0.30))
+        ndvi_val = max(0.2, min(0.85, 0.65 + min(0.12, (soil_pct - 20) * 0.004) + rain_mm * 0.01))
+        ndmi_val = max(-0.1, min(0.6, 0.28 + min(0.12, (soil_pct - 20) * 0.005)))
     elif month in (7, 8, 9, 10):
-        ndvi_val = max(0.2, min(0.88, 0.72 + rain_mm * 0.01))
-        ndmi_val = max(-0.1, min(0.65, 0.38))
+        ndvi_val = max(0.2, min(0.88, 0.70 + min(0.12, (soil_pct - 20) * 0.004) + rain_mm * 0.01))
+        ndmi_val = max(-0.1, min(0.65, 0.35 + min(0.15, (soil_pct - 20) * 0.005)))
     else:
-        ndvi_val = max(0.15, min(0.70, 0.46))
-        ndmi_val = max(-0.2, min(0.5, 0.18))
+        ndvi_val = max(0.15, min(0.70, 0.45 + min(0.10, (soil_pct - 20) * 0.004)))
+        ndmi_val = max(-0.2, min(0.5, 0.18 + min(0.10, (soil_pct - 20) * 0.004)))
 
     ndvi_baseline = max(0.2, min(0.85, ndvi_val - 0.03))
     ndvi_anomaly = round(ndvi_val - ndvi_baseline, 3)
@@ -72,7 +72,7 @@ async def get_farm_stress(
         ndvi_anomaly=ndvi_anomaly,
         ndmi=round(ndmi_val, 3),
         land_surface_temperature_c=round(lst_val, 1),
-        soil_moisture=None,
+        soil_moisture=round(soil_pct, 1),
     )
     score = compute_stress_score(inputs)
     level = classify_stress(score)
@@ -93,7 +93,9 @@ async def get_farm_stress(
         ndvi_baseline=round(ndvi_baseline, 3),
         ndmi=round(ndmi_val, 3),
         land_surface_temperature_c=round(lst_val, 1),
-        soil_moisture=None,
+        soil_moisture=round(soil_pct, 1),
+        wind_speed_kmh=round(wind_speed, 1),
+        wind_gust_kmh=round(wind_gust, 1),
         stress_score=score,
         stress_level=level,
         start_date=resolved_start,

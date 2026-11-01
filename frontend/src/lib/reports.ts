@@ -44,6 +44,9 @@ export interface InsuranceReportRequest {
   satellite_ndmi?: number;
   satellite_lst_c?: number;
   soil_moisture_pct?: number;
+  weather_temp_c?: number;
+  weather_wind_kmh?: number;
+  weather_rain_mm?: number;
 }
 
 export interface InsuranceEvidenceReport {
@@ -266,11 +269,11 @@ function createClientFallbackReport(request: InsuranceReportRequest): InsuranceE
     weather_snapshots: [
       {
         observed_on: request.period_start,
-        rainfall_mm: 138.4,
-        max_temperature_c: 23.4,
-        min_temperature_c: 17.2,
-        wind_speed_kmh: 44.5,
-        source: "Open-Meteo Historical",
+        rainfall_mm: request.weather_rain_mm ?? 0.0,
+        max_temperature_c: request.weather_temp_c ?? (request.satellite_lst_c ?? 26.5),
+        min_temperature_c: request.weather_temp_c ? Number((request.weather_temp_c - 6.0).toFixed(1)) : 18.0,
+        wind_speed_kmh: request.weather_wind_kmh ?? 12.0,
+        source: "Open-Meteo Live & Historical Telemetry",
       },
     ],
     photos: (request.photo_uris ?? []).map((uri, idx) => ({

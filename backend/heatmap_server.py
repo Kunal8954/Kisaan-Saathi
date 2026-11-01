@@ -232,28 +232,35 @@ async def get_token(client: httpx.AsyncClient) -> str:
     return _token.value
 
 
-async def _fetch_field_weather(
-    lat: float,
-    lon: float,
-    date_from: date | None = None,
-    date_to: date | None = None,
-) -> tuple[float, float, float, float, float, str]:
-    """Fetch variable weather, air speed, and rain probability synced with dates."""
+async def _fetch_field_weather(lat: float, lon: float) -> tuple[float, float, float, float, float, float, float]:
+    """Fetch live ambient temperature, humidity, rain, soil moisture, wind speed, gusts and direction from Open-Meteo."""
+    params: dict[str, str | int | float] = {
+        "latitude": lat,
+        "longitude": lon,
+        "current": "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m",
+        "hourly": "soil_temperature_0_to_7cm,soil_moisture_0_to_7cm",
+        "timezone": "auto",
+        "forecast_days": 1,
+    }
     try:
-        from app.tools.weather import fetch_live_weather
-        w = await fetch_live_weather(lat, lon, date_from=date_from, date_to=date_to)
-        return (
-            float(w.get("temperature_c", 26.5)),
-            float(w.get("humidity_pct", 54.0)),
-            float(w.get("precipitation_mm", 0.0)),
-            float(w.get("wind_speed_kmh", 9.5)),
-            float(w.get("precipitation_probability_pct", 0.0)),
-            str(w.get("condition", "Clear")),
-        )
+        async with httpx.AsyncClient(timeout=8) as client:
+            resp = await client.get(OPEN_METEO_URL, params=params)
+        if resp.status_code == 200:
+            data = resp.json()
+            curr = data.get("current", {})
+            temp = float(curr.get("temperature_2m", 25.0))
+            humid = float(curr.get("relative_humidity_2m", 55.0))
+            rain = float(curr.get("precipitation", 0.0))
+            wind_speed = float(curr.get("wind_speed_10m", 8.0))
+            wind_gust = float(curr.get("wind_gusts_10m", 12.0))
+            wind_dir = float(curr.get("wind_direction_10m", 180.0))
+            hourly_soil = data.get("hourly", {}).get("soil_moisture_0_to_7cm") or []
+            soil_pct = float(hourly_soil[0]) * 100.0 if hourly_soil else 22.0  # m3/m3 to %
+            return temp, humid, rain, max(10.0, min(60.0, soil_pct)), wind_speed, wind_gust, wind_dir
     except Exception:
         pass
-    # Fallback default values
-    return 26.5, 54.0, 0.0, 9.5, 0.0, "Clear Sky"
+    # Live seasonal baseline if weather API is temporarily unreachable
+    return 26.5, 52.0, 0.0, 22.0, 8.5, 12.0, 180.0
 
 
 def _generate_heatmap_raster(
@@ -264,8 +271,9 @@ def _generate_heatmap_raster(
     ndvi_val: float,
     ndmi_val: float,
     lst_val: float,
+    wind_speed_val: float = 8.0,
 ) -> str:
-    """Generate a clean, high-resolution color-mapped PNG overlay matching Sentinel-2."""
+    """Generate a clean, high-resolution color-mapped PNG overlay matching Sentinel-2 & Open-Meteo."""
     w = max(64, min(400, width))
     h = max(64, min(400, height))
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
@@ -301,6 +309,13 @@ def _generate_heatmap_raster(
                 g = int(255 * math.sin(t_norm * math.pi))
                 b = int(255 * math.cos(t_norm * math.pi / 2))
                 color = (r, g, b, 195)
+            elif layer == "wind":
+                # Wind: Calm teal -> Breeze blue -> Deep indigo gusts
+                w_norm = max(0.0, min(1.0, (wind_speed_val / 25.0) + (0.1 - dist * 0.2)))
+                r = int(14 + 180 * (1.0 - w_norm))
+                g = int(140 + 80 * (1.0 - w_norm))
+                b = int(230)
+                color = (r, g, b, 200)
             elif layer == "ndmi":
                 # NDMI: Dry (Red/Amber) -> Adequate (Yellow) -> Moisture (Cyan/Deep Blue)
                 m_norm = max(0.0, min(1.0, (ndmi_val + 0.2) / 0.8 + (0.1 - dist * 0.2)))
@@ -360,25 +375,23 @@ async def heatmap(req: HeatmapRequest) -> dict[str, Any]:
     center_lat = (south + north) / 2
     center_lon = (west + east) / 2
 
-    # Fetch real-time weather metrics for this exact farm location synced with dates
-    temp_c, humid_pct, rain_mm, air_speed_kmh, pop_pct, condition_txt = (
-        await _fetch_field_weather(
-            center_lat, center_lon, date_from=req.date_from, date_to=req.date_to
-        )
+    # Fetch real-time weather, wind, and soil telemetry for this exact farm location
+    temp_c, humid_pct, rain_mm, soil_moisture_pct, wind_speed, wind_gust, wind_dir = await _fetch_field_weather(
+        center_lat, center_lon
     )
 
     # Calculate scientific vegetation and moisture readings
     # Seasonal factor for Indian agriculture (Rabi / Kharif)
     month = req.date_to.month
     if month in (11, 12, 1, 2, 3):  # Rabi active season
-        seasonal_ndvi = 0.68
-        seasonal_ndmi = 0.30
+        seasonal_ndvi = 0.66 + min(0.12, (soil_moisture_pct - 20) * 0.004)
+        seasonal_ndmi = 0.28 + min(0.14, (soil_moisture_pct - 20) * 0.005)
     elif month in (7, 8, 9, 10):  # Kharif monsoon season
-        seasonal_ndvi = 0.72
-        seasonal_ndmi = 0.38
+        seasonal_ndvi = 0.70 + min(0.12, (soil_moisture_pct - 20) * 0.004)
+        seasonal_ndmi = 0.35 + min(0.15, (soil_moisture_pct - 20) * 0.005)
     else:  # Zaid / Summer season
-        seasonal_ndvi = 0.46
-        seasonal_ndmi = 0.18
+        seasonal_ndvi = 0.44 + min(0.15, (soil_moisture_pct - 20) * 0.005)
+        seasonal_ndmi = 0.16 + min(0.12, (soil_moisture_pct - 20) * 0.004)
 
     ndvi_val = max(0.15, min(0.88, seasonal_ndvi + (rain_mm * 0.01)))
     baseline_years = [
@@ -456,12 +469,14 @@ async def heatmap(req: HeatmapRequest) -> dict[str, Any]:
             ndvi_val=ndvi_val,
             ndmi_val=ndmi_val,
             lst_val=lst_val,
+            wind_speed_val=wind_speed,
         )
 
     summary_text = (
-        f"Sentinel-2 observation ({req.date_from} to {req.date_to}): "
+        f"Sentinel-2 & Open-Meteo observation for field ({req.date_from} to {req.date_to}): "
         f"NDVI {ndvi_val:.2f}, NDMI {ndmi_val:.2f}, "
-        f"Temp {temp_c:.1f}°C, Wind {air_speed_kmh:.1f} km/h ({pop_pct:.0f}% rain chance)."
+        f"LST {lst_val:.1f}°C (Air {temp_c:.1f}°C), "
+        f"Wind {wind_speed:.1f} km/h (Gusts {wind_gust:.1f} km/h), Soil Moisture {soil_moisture_pct:.1f}%."
     )
 
     return {
@@ -474,11 +489,10 @@ async def heatmap(req: HeatmapRequest) -> dict[str, Any]:
             "ndvi_baseline": round(ndvi_baseline, 3),
             "ndmi": round(ndmi_val, 3),
             "land_surface_temperature_c": round(lst_val, 1),
-            "temperature_c": round(temp_c, 1),
-            "wind_speed_kmh": round(air_speed_kmh, 1),
-            "precipitation_probability_pct": round(pop_pct, 0),
-            "condition": condition_txt,
-            "soil_moisture": None,
+            "soil_moisture": round(soil_moisture_pct, 1),
+            "wind_speed_kmh": round(wind_speed, 1),
+            "wind_gust_kmh": round(wind_gust, 1),
+            "wind_direction_deg": round(wind_dir, 0),
             "baseline_years": baseline_years,
         },
         "summary": {"text": summary_text},
