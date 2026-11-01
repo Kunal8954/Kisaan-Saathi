@@ -12,6 +12,7 @@ import {
   Polygon,
   TileLayer,
   useMap,
+  useMapEvents,
 } from "react-leaflet";
 import type { Feature, Polygon as GeoJSONPolygon } from "geojson";
 import "@geoman-io/leaflet-geoman-free";
@@ -82,6 +83,53 @@ function extractPolygonCoordinates(layer: unknown): [number, number][][] | null 
       // ignore
     }
   }
+
+  return null;
+}
+
+function MapClickHandler({
+  onGeometryChange,
+}: {
+  onGeometryChange: (geometry: FieldGeometry) => void;
+}) {
+  const map = useMap();
+  const changeRef = useRef(onGeometryChange);
+  changeRef.current = onGeometryChange;
+
+  useMapEvents({
+    click(e) {
+      try {
+        if (
+          typeof (map as unknown as { pm?: { globalDrawModeEnabled?: () => boolean } })?.pm
+            ?.globalDrawModeEnabled === "function"
+        ) {
+          if (
+            (map as unknown as { pm: { globalDrawModeEnabled: () => boolean } }).pm.globalDrawModeEnabled()
+          ) {
+            return;
+          }
+        }
+      } catch {
+        // ignore
+      }
+
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+      const dLat = 0.0016;
+      const dLng = 0.0020;
+      const ring: [number, number][] = [
+        [lng - dLng, lat - dLat],
+        [lng + dLng, lat - dLat],
+        [lng + dLng, lat + dLat],
+        [lng - dLng, lat + dLat],
+        [lng - dLng, lat - dLat],
+      ];
+      changeRef.current({
+        type: "Polygon",
+        coordinates: [ring],
+      });
+    },
+  });
 
   return null;
 }
@@ -369,6 +417,7 @@ export function StressMapInner({
             onGeometryClear={onGeometryClear}
             drawnLayerRef={drawnLayerRef}
           />
+          <MapClickHandler onGeometryChange={onGeometryChange} />
 
           {positions.length >= 3 ? (
             <Polygon

@@ -49,6 +49,94 @@ function daysAgo(days: number): string {
   return toInputDate(date);
 }
 
+interface FarmPreset {
+  id: string;
+  nameHi: string;
+  nameEn: string;
+  cropHi: string;
+  cropEn: string;
+  geometry: FieldGeometry;
+}
+
+const FARM_PRESETS: FarmPreset[] = [
+  {
+    id: "karnal",
+    nameHi: "🌾 करनाल (हरियाणा)",
+    nameEn: "🌾 Karnal (Haryana)",
+    cropHi: "गेहूं / धान",
+    cropEn: "Wheat / Paddy",
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [76.9885, 29.6840],
+          [76.9925, 29.6840],
+          [76.9925, 29.6875],
+          [76.9885, 29.6875],
+          [76.9885, 29.6840],
+        ],
+      ],
+    },
+  },
+  {
+    id: "ludhiana",
+    nameHi: "🚜 लुधियाना (पंजाब)",
+    nameEn: "🚜 Ludhiana (Punjab)",
+    cropHi: "गेहूं / सरसों",
+    cropEn: "Wheat / Mustard",
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [75.8550, 30.8995],
+          [75.8595, 30.8995],
+          [75.8595, 30.9030],
+          [75.8550, 30.9030],
+          [75.8550, 30.8995],
+        ],
+      ],
+    },
+  },
+  {
+    id: "varanasi",
+    nameHi: "🌱 वाराणसी (उत्तर प्रदेश)",
+    nameEn: "🌱 Varanasi (UP)",
+    cropHi: "धान / दलहन",
+    cropEn: "Paddy / Pulses",
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [82.9715, 25.3160],
+          [82.9760, 25.3160],
+          [82.9760, 25.3195],
+          [82.9715, 25.3195],
+          [82.9715, 25.3160],
+        ],
+      ],
+    },
+  },
+  {
+    id: "nashik",
+    nameHi: "🌴 नासिक (महाराष्ट्र)",
+    nameEn: "🌴 Nashik (Maharashtra)",
+    cropHi: "प्याज / अंगूर",
+    cropEn: "Onion / Grapes",
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [73.7875, 19.9960],
+          [73.7920, 19.9960],
+          [73.7920, 19.9995],
+          [73.7875, 19.9995],
+          [73.7875, 19.9960],
+        ],
+      ],
+    },
+  },
+];
+
 export function StressMap() {
   const { t } = useI18n();
   const { user } = useAuth();
@@ -98,6 +186,17 @@ export function StressMap() {
     },
     [t.stress.error]
   );
+
+  // Auto-load default sample farm on first render so live metrics and weather appear immediately
+  useEffect(() => {
+    const defaultFarm = FARM_PRESETS[0];
+    setActiveGeometry(defaultFarm.geometry);
+    const m = measurePolygon(defaultFarm.geometry);
+    setMeasurement(m);
+    const from = daysAgo(30);
+    const to = daysAgo(0);
+    void loadHeatmapData(defaultFarm.geometry, from, to, "ndvi");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Directly when farmer draws a polygon on the map
   const handleGeometryChange = useCallback(
@@ -204,6 +303,55 @@ export function StressMap() {
       <p className={styles.stressSummary}>
         {t.stress.layerHint[activeLayer.labelKey]}
       </p>
+
+      {/* Quick Region Presets */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          flexWrap: "wrap",
+          margin: "10px 0 14px 0",
+          padding: "10px 14px",
+          background: "#f8fafc",
+          border: "1px solid #e2e8f0",
+          borderRadius: "12px",
+        }}
+      >
+        <span style={{ fontSize: "13px", fontWeight: 700, color: "#334155" }}>
+          {t.brand === "किसान साथी" ? "📍 त्वरित खेत नमूने (क्लिक करें):" : "📍 Quick Farm Presets (Click to Load):"}
+        </span>
+        {FARM_PRESETS.map((preset) => (
+          <button
+            key={preset.id}
+            type="button"
+            onClick={() => {
+              setActiveGeometry(preset.geometry);
+              setSelectedFieldId("");
+              setMeasurement(measurePolygon(preset.geometry));
+              const from = dateFrom || daysAgo(30);
+              const to = dateTo || daysAgo(0);
+              void loadHeatmapData(preset.geometry, from, to, layer);
+            }}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "20px",
+              border: "1px solid #cbd5e1",
+              background: "#ffffff",
+              color: "#0f172a",
+              fontSize: "13px",
+              fontWeight: 600,
+              cursor: "pointer",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+            }}
+          >
+            {t.brand === "किसान साथी" ? preset.nameHi : preset.nameEn}
+          </button>
+        ))}
+        <span style={{ fontSize: "12px", color: "#64748b", marginLeft: "auto" }}>
+          {t.brand === "किसान साथी" ? "💡 नक्शे पर कहीं भी क्लिक करके खेत बना सकते हैं" : "💡 Click anywhere on map to drop a farm"}
+        </span>
+      </div>
 
       {/* Drawing Guide & Field Selector Toolbar */}
       <div

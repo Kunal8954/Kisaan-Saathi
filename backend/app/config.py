@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     log_level: str = "INFO"
     api_prefix: str = "/api"
-    api_cors_origins: str = "http://localhost:3000"
+    api_cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,*"
 
     mongodb_uri: str = ""
     mongodb_db: str = "kisan_saathi"
