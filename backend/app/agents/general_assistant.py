@@ -55,7 +55,10 @@ CROP_SEASON_GUIDANCE_EN = (
 async def run(state: AgentState) -> AgentState:
     """Provide intelligent agricultural chat replies without hallucinating disease diagnosis."""
     settings = get_settings()
-    is_en = state.language == Language.ENGLISH
+    english_chars = sum(1 for c in state.message if "a" <= c.lower() <= "z")
+    is_en = state.language == Language.ENGLISH or (
+        english_chars > 6 and english_chars > len(state.message) * 0.4
+    )
     msg_lower = state.message.strip().lower()
 
     # Check if message is a simple greeting
@@ -68,20 +71,59 @@ async def run(state: AgentState) -> AgentState:
         w in msg_lower
         for w in ["फसल", "बोएं", "बुवाई", "पैदावार", "सीजन", "crop", "sow", "plant", "season"]
     )
+    is_weather_query = any(
+        w in msg_lower
+        for w in [
+            "मौसम", "तापमान", "बारिश", "हवा", "गर्मी", "सर्दी", "कोहरा", "धूप", "बादल",
+            "weather", "temperature", "temp", "rain", "wind", "humidity", "climate", "forecast",
+        ]
+    )
+
+    weather_context = ""
+    if is_weather_query:
+        try:
+            from app.tools.weather import get_weather_rag_context
+            lat = float(state.context.get("latitude") or state.context.get("lat") or 29.6857)
+            lon = float(state.context.get("longitude") or state.context.get("lon") or 76.9905)
+            loc_name = str(
+                state.context.get("location_name")
+                or ("Karnal / North India" if is_en else "करनाल / उत्तर भारत")
+            )
+            weather_context = await get_weather_rag_context(
+                lat=lat,
+                lon=lon,
+                location_name=loc_name,
+                language="en" if is_en else "hi",
+            )
+        except Exception:
+            pass
 
     # 1. If LLM provider (Groq or Gemini) is available, use generative answer
     if settings.groq_api_key or settings.google_cloud_project:
         try:
             llm = get_llm_provider()
-            system_prompt = (
-                "You are Kisan Saathi (किसान साथी), an expert, empathetic AI agricultural "
-                "advisor for Indian farmers. "
-                "Answer the farmer's question practical, step-by-step, and respectfully. "
-                "Do NOT hallucinate a crop disease diagnosis unless the user specifically asks "
-                "about a plant disease with symptoms. "
-                f"Respond in {'English' if is_en else 'Hindi'}. "
-                "Keep your response clear, structured, and farmer-friendly."
-            )
+            if is_weather_query and weather_context:
+                system_prompt = (
+                    "You are Kisan Saathi (किसान साथी), an expert AI agricultural advisor. "
+                    "Use the following real-time OpenWeatherMap telemetry to answer "
+                    "the farmer's question:\n\n"
+                    f"{weather_context}\n\n"
+                    "Clearly state the exact current temperature, air/wind speed, "
+                    "and rain probability. "
+                    "Provide practical farming guidance (e.g. spray safety, irrigation advice, "
+                    "crop precautions). "
+                    f"Respond in {'English' if is_en else 'Hindi'}."
+                )
+            else:
+                system_prompt = (
+                    "You are Kisan Saathi (किसान साथी), an expert, empathetic AI agricultural "
+                    "advisor for Indian farmers. "
+                    "Answer the farmer's question practical, step-by-step, and respectfully. "
+                    "Do NOT hallucinate a crop disease diagnosis unless the user specifically asks "
+                    "about a plant disease with symptoms. "
+                    f"Respond in {'English' if is_en else 'Hindi'}. "
+                    "Keep your response clear, structured, and farmer-friendly."
+                )
             response = await llm.generate(
                 LLMRequest(
                     messages=[
@@ -94,6 +136,8 @@ async def run(state: AgentState) -> AgentState:
             )
             if response.text and len(response.text.strip()) > 10:
                 state.result["general_reply"] = response.text.strip()
+                if is_weather_query:
+                    state.sources.append("OpenWeatherMap Live Telemetry")
                 state.sources.append("ICAR Package of Practices & Agricultural Extension")
                 return state
         except Exception:
@@ -102,6 +146,10 @@ async def run(state: AgentState) -> AgentState:
     # 2. Grounded deterministic offline fallbacks
     if is_greeting:
         state.result["general_reply"] = DEFAULT_GREETING_EN if is_en else DEFAULT_GREETING_HI
+    elif is_weather_query and weather_context:
+        state.result["general_reply"] = weather_context
+        state.sources.append("OpenWeatherMap Live Telemetry")
+        return state
     elif is_crop_plan:
         state.result["general_reply"] = (
             CROP_SEASON_GUIDANCE_EN if is_en else CROP_SEASON_GUIDANCE_HI

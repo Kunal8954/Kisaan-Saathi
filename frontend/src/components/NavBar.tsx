@@ -19,6 +19,7 @@ export function NavBar() {
     { href: "/schemes", label: t.nav.schemes },
     { href: "/reports", label: t.nav.reports },
     { href: "/places", label: t.nav.places },
+    { href: "/tasks", label: t.nav.tasks },
   ];
 
   return (

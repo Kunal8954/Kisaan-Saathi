@@ -47,8 +47,10 @@ async def get_farm_stress(
     resolved_lat = lat if lat is not None else 28.6
     resolved_lon = lon if lon is not None else 77.2
 
-    # Fetch live weather metrics
-    temp_c, _, rain_mm = await _fetch_field_weather(resolved_lat, resolved_lon)
+    # Fetch live weather metrics synced with date window
+    temp_c, _, rain_mm, *_ = await _fetch_field_weather(
+        resolved_lat, resolved_lon, date_from=resolved_start, date_to=resolved_end
+    )
 
     # Seasonal baseline & NDVI
     month = resolved_end.month

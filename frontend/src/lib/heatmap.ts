@@ -9,8 +9,12 @@ export interface HeatmapMetrics {
   ndvi_baseline: number | null;
   ndmi: number | null;
   land_surface_temperature_c: number | null;
-  soil_moisture: number | null;
+  soil_moisture?: number | null;
   baseline_years: number[];
+  temperature_c?: number | null;
+  wind_speed_kmh?: number | null;
+  precipitation_probability_pct?: number | null;
+  condition?: string | null;
 }
 
 export interface HeatmapResult {
@@ -229,7 +233,7 @@ function generateFallbackHeatmap(
   const summary =
     `Sentinel-2 observation for field (${dateFrom} to ${dateTo}): ` +
     `NDVI ${ndvi.toFixed(2)}, NDMI ${ndmi.toFixed(2)}, ` +
-    `LST ${lst.toFixed(1)}°C, Soil Moisture ${soilMoisture.toFixed(1)}%.`;
+    `LST ${lst.toFixed(1)}°C.`;
 
   return {
     imageUrl,
@@ -244,7 +248,7 @@ function generateFallbackHeatmap(
       ndvi_baseline: ndviBaseline,
       ndmi,
       land_surface_temperature_c: lst,
-      soil_moisture: soilMoisture,
+      soil_moisture: null,
       baseline_years: baselineYears,
     },
     summary,

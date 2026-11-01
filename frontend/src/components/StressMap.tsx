@@ -484,6 +484,8 @@ export function StressMap() {
           metricsError={result ? null : error}
           latitude={selectedPoint.latitude}
           longitude={selectedPoint.longitude}
+          dateFrom={dateFrom}
+          dateTo={dateTo}
         />
       ) : null}
 

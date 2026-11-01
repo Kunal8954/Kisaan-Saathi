@@ -232,29 +232,28 @@ async def get_token(client: httpx.AsyncClient) -> str:
     return _token.value
 
 
-async def _fetch_field_weather(lat: float, lon: float) -> tuple[float, float, float]:
-    """Fetch current ambient temperature, humidity and rainfall forecast."""
-    params: dict[str, str | int | float] = {
-        "latitude": lat,
-        "longitude": lon,
-        "current": "temperature_2m,relative_humidity_2m,precipitation",
-        "timezone": "auto",
-        "forecast_days": 1,
-    }
+async def _fetch_field_weather(
+    lat: float,
+    lon: float,
+    date_from: date | None = None,
+    date_to: date | None = None,
+) -> tuple[float, float, float, float, float, str]:
+    """Fetch variable weather, air speed, and rain probability synced with dates."""
     try:
-        async with httpx.AsyncClient(timeout=8) as client:
-            resp = await client.get(OPEN_METEO_URL, params=params)
-        if resp.status_code == 200:
-            data = resp.json()
-            curr = data.get("current", {})
-            temp = float(curr.get("temperature_2m", 28.0))
-            humid = float(curr.get("relative_humidity_2m", 55.0))
-            rain = float(curr.get("precipitation", 0.0))
-            return temp, humid, rain
+        from app.tools.weather import fetch_live_weather
+        w = await fetch_live_weather(lat, lon, date_from=date_from, date_to=date_to)
+        return (
+            float(w.get("temperature_c", 26.5)),
+            float(w.get("humidity_pct", 54.0)),
+            float(w.get("precipitation_mm", 0.0)),
+            float(w.get("wind_speed_kmh", 9.5)),
+            float(w.get("precipitation_probability_pct", 0.0)),
+            str(w.get("condition", "Clear")),
+        )
     except Exception:
         pass
-    # Fallback default values if weather API is unreachable
-    return 29.5, 52.0, 0.0
+    # Fallback default values
+    return 26.5, 54.0, 0.0, 9.5, 0.0, "Clear Sky"
 
 
 def _generate_heatmap_raster(
@@ -361,9 +360,11 @@ async def heatmap(req: HeatmapRequest) -> dict[str, Any]:
     center_lat = (south + north) / 2
     center_lon = (west + east) / 2
 
-    # Fetch real-time weather metrics for this exact farm location
-    temp_c, humid_pct, rain_mm = await _fetch_field_weather(
-        center_lat, center_lon
+    # Fetch real-time weather metrics for this exact farm location synced with dates
+    temp_c, humid_pct, rain_mm, air_speed_kmh, pop_pct, condition_txt = (
+        await _fetch_field_weather(
+            center_lat, center_lon, date_from=req.date_from, date_to=req.date_to
+        )
     )
 
     # Calculate scientific vegetation and moisture readings
@@ -458,8 +459,9 @@ async def heatmap(req: HeatmapRequest) -> dict[str, Any]:
         )
 
     summary_text = (
-        f"Sentinel-2 observation for field ({req.date_from} to {req.date_to}): "
-        f"NDVI {ndvi_val:.2f}, NDMI {ndmi_val:.2f}, LST {lst_val:.1f}°C."
+        f"Sentinel-2 observation ({req.date_from} to {req.date_to}): "
+        f"NDVI {ndvi_val:.2f}, NDMI {ndmi_val:.2f}, "
+        f"Temp {temp_c:.1f}°C, Wind {air_speed_kmh:.1f} km/h ({pop_pct:.0f}% rain chance)."
     )
 
     return {
@@ -472,6 +474,10 @@ async def heatmap(req: HeatmapRequest) -> dict[str, Any]:
             "ndvi_baseline": round(ndvi_baseline, 3),
             "ndmi": round(ndmi_val, 3),
             "land_surface_temperature_c": round(lst_val, 1),
+            "temperature_c": round(temp_c, 1),
+            "wind_speed_kmh": round(air_speed_kmh, 1),
+            "precipitation_probability_pct": round(pop_pct, 0),
+            "condition": condition_txt,
             "soil_moisture": None,
             "baseline_years": baseline_years,
         },

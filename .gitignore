@@ -38,13 +38,13 @@ pnpm-debug.log*
 .vscode/
 
 # Local data artifacts (keep directory placeholders)
-data/**/*.pdf
-data/**/*.jpg
-data/**/*.jpeg
-data/**/*.png
-data/**/*.json
-!data/**/.gitkeep
-!data/crop_knowledge/*.json
+**/data/**/*.pdf
+**/data/**/*.jpg
+**/data/**/*.jpeg
+**/data/**/*.png
+**/data/**/*.json
+!**/data/**/.gitkeep
+!**/data/crop_knowledge/*.json
 
 # Generated reports and uploads
 uploads/

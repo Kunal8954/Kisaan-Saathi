@@ -64,6 +64,8 @@ export function FieldEnvironment({ field }: FieldEnvironmentProps) {
       metricsError={failed ? t.fieldAdvisory.metricsError : null}
       latitude={point.latitude}
       longitude={point.longitude}
+      dateFrom={daysAgo(30)}
+      dateTo={daysAgo(0)}
     />
   );
 }

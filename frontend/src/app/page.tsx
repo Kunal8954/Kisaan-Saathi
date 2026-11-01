@@ -12,6 +12,7 @@ const FEATURES = [
   { key: "schemes", href: "/schemes" },
   { key: "reports", href: "/reports" },
   { key: "places", href: "/places" },
+  { key: "tasks", href: "/tasks" },
 ] as const;
 
 export default function HomePage() {

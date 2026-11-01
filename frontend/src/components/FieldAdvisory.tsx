@@ -19,6 +19,8 @@ interface FieldAdvisoryProps {
   metricsError?: string | null;
   latitude: number;
   longitude: number;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 const SEVERITY_CLASS: Record<AdviceSeverity, string> = {
@@ -79,8 +81,10 @@ export function FieldAdvisory({
   metricsError = null,
   latitude,
   longitude,
+  dateFrom,
+  dateTo,
 }: FieldAdvisoryProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [weather, setWeather] = useState<WeatherResult | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [weatherError, setWeatherError] = useState(false);
@@ -90,7 +94,7 @@ export function FieldAdvisory({
     setWeatherLoading(true);
     setWeatherError(false);
 
-    fetchFieldWeather(latitude, longitude)
+    fetchFieldWeather(latitude, longitude, dateFrom, dateTo)
       .then((data) => {
         if (active) {
           setWeather(data);
@@ -111,7 +115,7 @@ export function FieldAdvisory({
     return () => {
       active = false;
     };
-  }, [latitude, longitude]);
+  }, [latitude, longitude, dateFrom, dateTo]);
 
   const signals = buildFieldAdvisory(metrics, weather);
   const current = weather?.current;
@@ -123,17 +127,23 @@ export function FieldAdvisory({
           <h2 className={styles.title} id="field-advisory-title">
             {t.fieldAdvisory.title}
           </h2>
-          <p className={styles.subtitle}>{t.fieldAdvisory.subtitle}</p>
+          <p className={styles.subtitle}>
+            {dateFrom && dateTo
+              ? `${dateFrom} ${locale === "hi" ? "से" : "to"} ${dateTo} ${locale === "hi" ? "के अनुसार मौसम व सलाह" : "synced telemetry & advisory"}`
+              : t.fieldAdvisory.subtitle}
+          </p>
         </div>
       </div>
 
       <div className={styles.weather}>
         <div className={styles.weatherHeader}>
           <h3 className={styles.weatherTitle}>
-            {t.fieldAdvisory.nowTitle}
+            {dateFrom && dateTo && dateTo < new Date().toISOString().slice(0, 10)
+              ? (locale === "hi" ? "चयनित तारीख का मौसम" : "Period Weather Telemetry")
+              : t.fieldAdvisory.nowTitle}
           </h3>
           {weather ? (
-            <span className={styles.source}>{t.fieldAdvisory.weatherSource}</span>
+            <span className={styles.source}>{weather.source}</span>
           ) : null}
         </div>
         {weatherLoading ? (
@@ -151,12 +161,16 @@ export function FieldAdvisory({
               <dd>{formatNumber(current?.humidity_pct, 0, "%")}</dd>
             </div>
             <div>
-              <dt>{t.fieldAdvisory.windLabel}</dt>
-              <dd>{formatNumber(current?.wind_speed_kmh, 0, " km/h")}</dd>
+              <dt>{locale === "hi" ? "हवा की गति (Air Speed)" : "Air / Wind Speed"}</dt>
+              <dd>{formatNumber(current?.wind_speed_kmh, 1, " km/h")}</dd>
             </div>
             <div>
-              <dt>{t.fieldAdvisory.rainLabel}</dt>
-              <dd>{formatNumber(current?.precipitation_mm, 1, " mm")}</dd>
+              <dt>{locale === "hi" ? "बारिश की संभावना" : "Rain Possibility"}</dt>
+              <dd style={{ color: "#0284c7" }}>
+                {current?.precipitation_probability_pct !== null && current?.precipitation_probability_pct !== undefined
+                  ? `${current.precipitation_probability_pct}%`
+                  : `${formatNumber(current?.precipitation_mm, 1, " mm")}`}
+              </dd>
             </div>
           </dl>
         )}

@@ -15,6 +15,7 @@ export const dictionaries = {
       schemes: "योजनाएँ",
       reports: "बीमा साक्ष्य PDF",
       places: "मंडी व कृषि केंद्र",
+      tasks: "खेती कार्य",
       login: "लॉगिन",
       dashboard: "डैशबोर्ड",
     },
@@ -54,6 +55,10 @@ export const dictionaries = {
         places: {
           title: "मंडी भाव व कृषि केंद्र",
           description: "निकटतम APMC मंडियां, खाद-बीज दुकान और KVK केंद्र लाइव खोजें।",
+        },
+        tasks: {
+          title: "खेती कार्य व मौसम रिमाइंडर",
+          description: "योजनाबद्ध फसल कार्य और आज के मौसम के अनुसार क्या करें और क्या न करें।",
         },
       },
       noticeTitle: "महत्वपूर्ण सूचना",
@@ -459,6 +464,7 @@ export const dictionaries = {
       schemes: "Schemes",
       reports: "Claim PDF",
       places: "Mandis & Shops",
+      tasks: "Tasks & Alerts",
       login: "Login",
       dashboard: "Dashboard",
     },
@@ -498,6 +504,10 @@ export const dictionaries = {
         places: {
           title: "Mandis & Agri Centers",
           description: "Locate nearby APMC grain mandis, input shops, and KVK centers with GPS.",
+        },
+        tasks: {
+          title: "Farm Tasks & Weather Alerts",
+          description: "Track planned crop milestones and live weather-driven action reminders.",
         },
       },
       noticeTitle: "Important note",
