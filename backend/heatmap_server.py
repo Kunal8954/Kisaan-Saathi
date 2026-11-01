@@ -36,6 +36,8 @@ TOKEN_URL = (
 )
 PROCESS_URL = "https://sh.dataspace.copernicus.eu/api/v1/process"
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
+OPENWEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
+OPENWEATHERMAP_API_KEY = os.getenv("OPENWEATHERMAP_API_KEY", "")
 MAX_HECTARES = 500  # protects free processing quota
 MAX_DAYS = 90  # longest date range accepted
 MAX_PIXELS = 1500  # max image width/height
@@ -233,7 +235,38 @@ async def get_token(client: httpx.AsyncClient) -> str:
 
 
 async def _fetch_field_weather(lat: float, lon: float) -> tuple[float, float, float, float, float, float, float]:
-    """Fetch live ambient temperature, humidity, rain, soil moisture, wind speed, gusts and direction from Open-Meteo."""
+    """Fetch live ambient temperature, humidity, rain, soil moisture, wind speed, gusts and direction from OpenWeatherMap or Open-Meteo."""
+    # 1. Primary: OpenWeatherMap via live API key
+    if OPENWEATHERMAP_API_KEY:
+        try:
+            owm_params: dict[str, str | float] = {
+                "lat": lat,
+                "lon": lon,
+                "appid": OPENWEATHERMAP_API_KEY,
+                "units": "metric",
+            }
+            async with httpx.AsyncClient(timeout=8) as client:
+                owm_resp = await client.get(OPENWEATHER_URL, params=owm_params)
+            if owm_resp.status_code == 200:
+                owm_data = owm_resp.json()
+                temp = float(owm_data.get("main", {}).get("temp", 25.0))
+                humid = float(owm_data.get("main", {}).get("humidity", 55.0))
+                rain = float(
+                    owm_data.get("rain", {}).get("1h")
+                    or owm_data.get("rain", {}).get("3h")
+                    or 0.0
+                )
+                speed_ms = float(owm_data.get("wind", {}).get("speed", 2.2))
+                gust_ms = float(owm_data.get("wind", {}).get("gust", speed_ms))
+                wind_speed = round(speed_ms * 3.6, 1)
+                wind_gust = round(gust_ms * 3.6, 1)
+                wind_dir = float(owm_data.get("wind", {}).get("deg", 180.0))
+                soil_pct = max(10.0, min(65.0, 18.0 + (humid * 0.22) + (rain * 4.0)))
+                return temp, humid, rain, round(soil_pct, 1), wind_speed, wind_gust, wind_dir
+        except Exception:
+            pass
+
+    # 2. Secondary: Open-Meteo fallback
     params: dict[str, str | int | float] = {
         "latitude": lat,
         "longitude": lon,

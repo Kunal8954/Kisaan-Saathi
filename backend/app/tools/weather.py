@@ -2,6 +2,7 @@
 Fetches real meteorological observations from Open-Meteo API.
 """
 
+import os
 from datetime import date, timedelta
 from typing import Any
 import httpx
@@ -11,6 +12,8 @@ from app.models.report import WeatherSnapshot
 
 FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast"
 ARCHIVE_API_URL = "https://archive-api.open-meteo.com/v1/archive"
+OPENWEATHER_FORECAST_URL = "https://api.openweathermap.org/data/2.5/forecast"
+OPENWEATHERMAP_API_KEY = os.getenv("OPENWEATHERMAP_API_KEY", "")
 
 
 async def get_weather_history(
@@ -102,7 +105,64 @@ async def get_weather_forecast(
     location: GeoPoint,
     days: int = 7,
 ) -> list[dict[str, Any]]:
-    """Return a short-range forecast from Open-Meteo including temperature, wind speed, gusts, and rain."""
+    """Return a short-range forecast from OpenWeatherMap or Open-Meteo including temperature, wind speed, gusts, and rain."""
+    # 1. Primary: OpenWeatherMap via live API key
+    if OPENWEATHERMAP_API_KEY:
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.get(
+                    OPENWEATHER_FORECAST_URL,
+                    params={
+                        "lat": location.latitude,
+                        "lon": location.longitude,
+                        "appid": OPENWEATHERMAP_API_KEY,
+                        "units": "metric",
+                    },
+                )
+            if resp.status_code == 200:
+                f_data = resp.json()
+                daily_map: dict[str, dict[str, list[float] | float]] = {}
+                for item in f_data.get("list", []):
+                    dt_txt = str(item.get("dt_txt", ""))
+                    day_str = dt_txt.split(" ")[0]
+                    if not day_str:
+                        continue
+                    if day_str not in daily_map:
+                        daily_map[day_str] = {"temps": [], "winds": [], "gusts": [], "rain": 0.0}
+                    t_val = item.get("main", {}).get("temp")
+                    if t_val is not None:
+                        daily_map[day_str]["temps"].append(float(t_val))
+                    w_val = item.get("wind", {}).get("speed")
+                    if w_val is not None:
+                        daily_map[day_str]["winds"].append(float(w_val) * 3.6)
+                    g_val = item.get("wind", {}).get("gust", w_val)
+                    if g_val is not None:
+                        daily_map[day_str]["gusts"].append(float(g_val) * 3.6)
+                    r_val = item.get("rain", {}).get("3h")
+                    if r_val is not None:
+                        daily_map[day_str]["rain"] += float(r_val)
+
+                forecast_rows = []
+                for day_str, stats in list(daily_map.items())[:days]:
+                    t_list = stats["temps"]  # type: ignore[assignment]
+                    w_list = stats["winds"]  # type: ignore[assignment]
+                    g_list = stats["gusts"]  # type: ignore[assignment]
+                    r_tot = stats["rain"]  # type: ignore[assignment]
+                    forecast_rows.append({
+                        "date": day_str,
+                        "temperature_max_c": round(max(t_list), 1) if t_list else None,
+                        "temperature_min_c": round(min(t_list), 1) if t_list else None,
+                        "precipitation_mm": round(r_tot, 1),
+                        "wind_speed_kmh": round(max(w_list), 1) if w_list else None,
+                        "wind_gust_kmh": round(max(g_list), 1) if g_list else None,
+                        "source": "OpenWeatherMap Live Forecast",
+                    })
+                if forecast_rows:
+                    return forecast_rows
+        except Exception:
+            pass
+
+    # 2. Secondary: Open-Meteo fallback
     params = {
         "latitude": location.latitude,
         "longitude": location.longitude,

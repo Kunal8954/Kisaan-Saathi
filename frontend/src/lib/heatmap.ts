@@ -110,6 +110,8 @@ function computePolygonBBox(polygon: FieldGeometry): {
   return { south, west, north, east, ring };
 }
 
+const OWM_API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || "";
+
 async function fetchRealFieldTelemetry(lat: number, lon: number): Promise<{
   temp_c: number;
   soil_moisture_pct: number;
@@ -119,6 +121,51 @@ async function fetchRealFieldTelemetry(lat: number, lon: number): Promise<{
   humidity_pct: number;
   rain_mm: number;
 }> {
+  // 1. Direct browser query to OpenWeatherMap with farmer coordinates
+  try {
+    const owmUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat.toFixed(
+      4
+    )}&lon=${lon.toFixed(4)}&appid=${OWM_API_KEY}&units=metric`;
+    const res = await fetch(owmUrl);
+    if (res.ok) {
+      const wData = await res.json();
+      const tempC =
+        wData.main?.temp !== undefined ? Number(wData.main.temp) : 25.0;
+      const humidityPct =
+        wData.main?.humidity !== undefined ? Number(wData.main.humidity) : 55.0;
+      const windSpeedKmh =
+        wData.wind?.speed !== undefined
+          ? Number((wData.wind.speed * 3.6).toFixed(1))
+          : 8.0;
+      const windGustKmh =
+        wData.wind?.gust !== undefined
+          ? Number((wData.wind.gust * 3.6).toFixed(1))
+          : windSpeedKmh;
+      const windDirDeg =
+        wData.wind?.deg !== undefined ? Number(wData.wind.deg) : 180;
+      const rainMm =
+        Number(wData.rain?.["1h"] ?? wData.rain?.["3h"] ?? 0);
+
+      // Soil moisture estimation based on humidity & rain when direct sensors are absent
+      const soilMoisture = Number(
+        Math.min(75, Math.max(12, 18.0 + (humidityPct * 0.22) + (rainMm * 4.0))).toFixed(1)
+      );
+
+      return {
+        temp_c: tempC,
+        soil_moisture_pct: soilMoisture,
+        wind_speed_kmh: windSpeedKmh,
+        wind_gust_kmh: windGustKmh,
+        wind_direction_deg: windDirDeg,
+        humidity_pct: humidityPct,
+        rain_mm: rainMm,
+      };
+    }
+  } catch (err) {
+    console.warn("OpenWeatherMap heatmap telemetry query notice:", err);
+  }
+
+  // 2. Fallback to Open-Meteo
   const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m&hourly=soil_temperature_0_to_7cm,soil_moisture_0_to_7cm&timezone=auto&forecast_days=1`;
   try {
     const res = await fetch(omUrl);
