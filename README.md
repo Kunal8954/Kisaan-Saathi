@@ -547,16 +547,6 @@ Configure the backend API URL in the appropriate frontend environment file.
 
 Set the actual configuration values required by the implementation:
 
-```env
-DATABASE_URL=YOUR_YUGABYTEDB_CONNECTION_STRING
-
-MEKO_MCP_URL=https://mcp.mekodata.ai/mcp
-MEKO_API_KEY=YOUR_MEKO_API_KEY
-
-LLM_API_KEY=YOUR_LLM_API_KEY
-
-FRONTEND_URL=YOUR_FRONTEND_URL
-```
 
 These are illustrative configuration names. Use the exact environment variable names expected by your source code.
 
@@ -663,11 +653,6 @@ By combining distributed SQL infrastructure, shared AI memory, MCP integrations,
 
 ---
 
-## 👨‍💻 Project
-
-**Project:** Farm Inventory Management System  
-**Category:** AgriTech · AI · Multi-Agent Systems · Inventory Management  
-**Repository:** [Add GitHub repository URL]
 
 ### Acknowledgements
 
